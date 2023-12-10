@@ -36,7 +36,10 @@ void vcpu_arch_reset(struct vcpu* vcpu, vaddr_t entry)
 
     csrs_sscratch_write((unsigned long)&vcpu->regs);
 
-    vcpu->regs.hstatus = HSTATUS_SPV | HSTATUS_VSXL_64;
+    vcpu->regs.hstatus = HSTATUS_SPV;
+    if (RV64) {
+        vcpu->regs.hstatus |= HSTATUS_VSXL_64;
+    }
     vcpu->regs.sstatus = SSTATUS_SPP_BIT | SSTATUS_FS_DIRTY | SSTATUS_XS_DIRTY;
     vcpu->regs.sepc = entry;
     vcpu->regs.a0 = vcpu->arch.hart_id = vcpu->id;
