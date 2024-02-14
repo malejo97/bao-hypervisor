@@ -21,7 +21,7 @@ volatile struct gich_hw* gich;
 
 static cpuid_t gic_cpu_map[GIC_MAX_TARGETS];
 
-size_t NUM_LRS;
+size_t GIC_NUM_LRS;
 
 size_t gich_num_lrs()
 {

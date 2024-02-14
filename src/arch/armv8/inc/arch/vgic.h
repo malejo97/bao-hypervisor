@@ -56,6 +56,28 @@ struct vgicd {
     uint32_t IIDR;
 };
 
+struct vgic {
+    struct vgicd vgicd;
+
+    vaddr_t vgicr_addr;
+
+    struct list spilled;
+    spinlock_t spilled_lock;
+
+    struct emul_mem vgicd_emul;
+    struct emul_mem vgicr_emul;
+    struct emul_reg icc_sgir_emul;
+    struct emul_reg icc_sre_emul;
+};
+
+struct gich_state {
+    gic_lr_t lrs[GICH_MAX_NUM_LRS];
+    uint64_t elrsr;
+    uint32_t hcr;
+    uint32_t vmcr;
+    uint32_t ap1r[GICH_APR_NUM];
+};
+
 struct vgicr {
     spinlock_t lock;
     uint64_t TYPER;
@@ -67,8 +89,10 @@ struct vgic_priv {
 #if (GIC_VERSION != GICV2)
     struct vgicr vgicr;
 #endif
-    irqid_t curr_lrs[GIC_NUM_LIST_REGS];
+    irqid_t curr_lrs[GICH_MAX_NUM_LRS];
     struct vgic_int interrupts[GIC_CPU_PRIV];
+    struct list spilled;
+    struct gich_state gich;
 };
 
 void vgic_init(struct vm* vm, const struct vgic_dscrp* vgic_dscrp);
@@ -120,6 +144,8 @@ void vgic_int_set_field(struct vgic_reg_handler_info* handlers, struct vcpu* vcp
     struct vgic_int* interrupt, unsigned long data);
 void vgic_emul_razwi(struct emul_access* acc, struct vgic_reg_handler_info* handlers,
     bool gicr_access, cpuid_t vgicr_id);
+void vgic_save_state(struct vcpu* vcpu);
+void vgic_restore_state(struct vcpu* vcpu);
 
 /* interface for version specific vgic */
 bool vgic_int_has_other_target(struct vcpu* vcpu, struct vgic_int* interrupt);

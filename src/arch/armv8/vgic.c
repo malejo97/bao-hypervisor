@@ -49,8 +49,8 @@ inline struct vgic_int* vgic_get_int(struct vcpu* vcpu, irqid_t int_id, vcpuid_t
     if (int_id < GIC_CPU_PRIV) {
         struct vcpu* target_vcpu = vgicr_id == vcpu->id ? vcpu : vm_get_vcpu(vcpu->vm, vgicr_id);
         return &target_vcpu->arch.vgic_priv.interrupts[int_id];
-    } else if (int_id < vcpu->vm->arch.vgicd.int_num) {
-        return &vcpu->vm->arch.vgicd.interrupts[int_id - GIC_CPU_PRIV];
+    } else if (int_id < vcpu->vm->arch.vgic.vgicd.int_num) {
+        return &vcpu->vm->arch.vgic.vgicd.interrupts[int_id - GIC_CPU_PRIV];
     }
 
     return NULL;
@@ -132,7 +132,7 @@ void vgic_send_sgi_msg(struct vcpu* vcpu, cpumap_t pcpu_mask, irqid_t int_id)
     struct cpu_msg msg = {
         VGIC_IPI_ID,
         VGIC_INJECT,
-        VGIC_MSG_DATA(cpu()->vcpu->vm->id, 0, int_id, 0, cpu()->vcpu->id),
+        VGIC_MSG_DATA(vcpu->vm->id, 0, int_id, 0, vcpu->id),
     };
 
     for (size_t i = 0; i < platform.cpu_num; i++) {
@@ -283,15 +283,15 @@ bool vgic_remove_lr(struct vcpu* vcpu, struct vgic_int* interrupt)
 
 void vgic_add_spilled(struct vcpu* vcpu, struct vgic_int* interrupt)
 {
-    spin_lock(&vcpu->vm->arch.vgic_spilled_lock);
+    spin_lock(&vcpu->vm->arch.vgic.spilled_lock);
     struct list* spilled_list = NULL;
     if (gic_is_priv(interrupt->id)) {
-        spilled_list = &vcpu->arch.vgic_spilled;
+        spilled_list = &vcpu->arch.vgic_priv.spilled;
     } else {
-        spilled_list = &vcpu->vm->arch.vgic_spilled;
+        spilled_list = &vcpu->vm->arch.vgic.spilled;
     }
     list_push(spilled_list, (node_t*)interrupt);
-    spin_unlock(&vcpu->vm->arch.vgic_spilled_lock);
+    spin_unlock(&vcpu->vm->arch.vgic.spilled_lock);
     gich_set_hcr(gich_get_hcr() | GICH_HCR_NPIE_BIT);
 }
 
@@ -319,7 +319,7 @@ bool vgic_add_lr(struct vcpu* vcpu, struct vgic_int* interrupt)
 
     ssize_t lr_ind = -1;
     uint64_t elrsr = gich_get_elrsr();
-    for (size_t i = 0; i < NUM_LRS; i++) {
+    for (size_t i = 0; i < GIC_NUM_LRS; i++) {
         if (bit64_get(elrsr, i)) {
             lr_ind = i;
             break;
@@ -332,7 +332,7 @@ bool vgic_add_lr(struct vcpu* vcpu, struct vgic_int* interrupt)
         size_t pend_found = 0, act_found = 0;
         ssize_t pend_ind = -1, act_ind = -1;
 
-        for (size_t i = 0; i < NUM_LRS; i++) {
+        for (size_t i = 0; i < GIC_NUM_LRS; i++) {
             unsigned long lr = gich_read_lr(i);
             unsigned lr_id = GICH_LR_VID(lr);
             unsigned lr_prio = (lr & GICH_LR_PRIO_MSK) >> GICH_LR_PRIO_OFF;
@@ -383,7 +383,7 @@ bool vgic_add_lr(struct vcpu* vcpu, struct vgic_int* interrupt)
 
 static inline void vgic_update_enable(struct vcpu* vcpu)
 {
-    if (cpu()->vcpu->vm->arch.vgicd.CTLR & VGIC_ENABLE_MASK) {
+    if (vcpu->vm->arch.vgic.vgicd.CTLR & VGIC_ENABLE_MASK) {
         gich_set_hcr(gich_get_hcr() | GICH_HCR_En_BIT);
     } else {
         gich_set_hcr(gich_get_hcr() & ~GICH_HCR_En_BIT);
@@ -393,7 +393,7 @@ static inline void vgic_update_enable(struct vcpu* vcpu)
 void vgicd_emul_misc_access(struct emul_access* acc, struct vgic_reg_handler_info* handlers,
     bool gicr_access, cpuid_t vgicr_id)
 {
-    struct vgicd* vgicd = &cpu()->vcpu->vm->arch.vgicd;
+    struct vgicd* vgicd = &cpu()->vcpu->vm->arch.vgic.vgicd;
     unsigned reg = acc->addr & 0x7F;
 
     switch (reg) {
@@ -888,9 +888,9 @@ bool vgicd_emul_handler(struct emul_access* acc)
     }
 
     if (vgic_check_reg_alignment(acc, handler_info)) {
-        spin_lock(&cpu()->vcpu->vm->arch.vgicd.lock);
+        spin_lock(&cpu()->vcpu->vm->arch.vgic.vgicd.lock);
         handler_info->reg_access(acc, handler_info, false, cpu()->vcpu->id);
-        spin_unlock(&cpu()->vcpu->vm->arch.vgicd.lock);
+        spin_unlock(&cpu()->vcpu->vm->arch.vgic.vgicd.lock);
         return true;
     } else {
         return false;
@@ -969,15 +969,15 @@ void vgic_ipi_handler(uint32_t event, uint64_t data)
 }
 
 /**
- * Must be called holding the vgic_spilled_lock
+ * Must be called holding the spilled_lock
  */
 static inline struct vgic_int* vgic_highest_prio_spilled(struct vcpu* vcpu, unsigned flags,
     struct list** outlist)
 {
     struct vgic_int* irq = NULL;
     struct list* spilled_lists[] = {
-        &vcpu->arch.vgic_spilled,
-        &vcpu->vm->arch.vgic_spilled,
+        &vcpu->arch.vgic_priv.spilled,
+        &vcpu->vm->arch.vgic.spilled,
     };
     size_t spilled_list_size = sizeof(spilled_lists) / sizeof(struct list*);
     for (size_t i = 0; i < spilled_list_size; i++) {
@@ -1004,9 +1004,9 @@ static inline struct vgic_int* vgic_highest_prio_spilled(struct vcpu* vcpu, unsi
 static void vgic_refill_lrs(struct vcpu* vcpu, bool npie)
 {
     uint64_t elrsr = gich_get_elrsr();
-    ssize_t lr_ind = bit64_ffs(elrsr & BIT64_MASK(0, NUM_LRS));
+    ssize_t lr_ind = bit64_ffs(elrsr & BIT64_MASK(0, GIC_NUM_LRS));
     unsigned flags = npie ? PEND : ACT | PEND;
-    spin_lock(&vcpu->vm->arch.vgic_spilled_lock);
+    spin_lock(&vcpu->vm->arch.vgic.spilled_lock);
     while (lr_ind >= 0) {
         struct list* list = NULL;
         struct vgic_int* irq = vgic_highest_prio_spilled(vcpu, flags, &list);
@@ -1028,9 +1028,9 @@ static void vgic_refill_lrs(struct vcpu* vcpu, bool npie)
         }
         flags = ACT | PEND;
         elrsr = gich_get_elrsr();
-        lr_ind = bit64_ffs(elrsr & BIT64_MASK(0, NUM_LRS));
+        lr_ind = bit64_ffs(elrsr & BIT64_MASK(0, GIC_NUM_LRS));
     }
-    spin_unlock(&vcpu->vm->arch.vgic_spilled_lock);
+    spin_unlock(&vcpu->vm->arch.vgic.spilled_lock);
 }
 
 static void vgic_eoir_highest_spilled_active(struct vcpu* vcpu)
@@ -1057,7 +1057,7 @@ static void vgic_eoir_highest_spilled_active(struct vcpu* vcpu)
 void vgic_handle_trapped_eoir(struct vcpu* vcpu)
 {
     uint64_t eisr = gich_get_eisr();
-    int64_t lr_ind = bit64_ffs(eisr & BIT64_MASK(0, NUM_LRS));
+    int64_t lr_ind = bit64_ffs(eisr & BIT64_MASK(0, GIC_NUM_LRS));
     while (lr_ind >= 0) {
         unsigned long lr_val = gich_read_lr(lr_ind);
         gich_write_lr(lr_ind, 0);
@@ -1076,7 +1076,7 @@ void vgic_handle_trapped_eoir(struct vcpu* vcpu)
         }
         spin_unlock(&interrupt->lock);
         eisr = gich_get_eisr();
-        lr_ind = bit64_ffs(eisr & BIT64_MASK(0, NUM_LRS));
+        lr_ind = bit64_ffs(eisr & BIT64_MASK(0, GIC_NUM_LRS));
     }
 }
 

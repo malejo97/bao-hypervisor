@@ -81,7 +81,7 @@ void gic_init()
     if (cpu_is_master()) {
         gic_map_mmio();
         gicd_init();
-        NUM_LRS = gich_num_lrs();
+        GIC_NUM_LRS = gich_num_lrs();
     }
 
     cpu_sync_and_clear_msgs(&cpu_glb_sync);

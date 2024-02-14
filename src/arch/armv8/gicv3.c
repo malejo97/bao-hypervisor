@@ -18,7 +18,7 @@ volatile struct gicr_hw* gicr;
 static spinlock_t gicd_lock = SPINLOCK_INITVAL;
 static spinlock_t gicr_lock = SPINLOCK_INITVAL;
 
-size_t NUM_LRS;
+size_t GIC_NUM_LRS;
 
 size_t gich_num_lrs()
 {

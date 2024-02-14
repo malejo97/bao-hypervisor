@@ -55,7 +55,6 @@
 #define GICD_SGI_OFF(NINT)        ((NINT % 4) * 8)
 
 #define GIC_NUM_APR_REGS          ((1UL << (GIC_PRIO_BITS - 1)) / (sizeof(uint32_t) * 8))
-#define GIC_NUM_LIST_REGS         (64)
 
 /* Distributor Control Register, GICD_CTLR */
 
@@ -276,6 +275,7 @@ struct gicc_hw {
 #define ICH_VTR_MSK            GICH_VTR_MSK
 
 #if (GIC_VERSION == GICV2)
+#define GICH_APR_NUM      (1)
 #define GICH_LR_VID_OFF   (0)
 #define GICH_LR_VID_LEN   (10)
 #define GICH_LR_PID_OFF   (10)
@@ -287,12 +287,14 @@ struct gicc_hw {
 #define GICH_LR_HW_BIT    (1U << 31)
 #define GICH_LR_EOI_BIT   (1U << 19)
 #define GICH_NUM_ELRSR    (2)
+#define GICH_MAX_NUM_LRS  (64)
 #define GICH_LR_PRIO_MSK  BIT32_MASK(GICH_LR_PRIO_OFF, GICH_LR_PRIO_LEN)
 #define GICH_LR_PID_MSK   BIT32_MASK(GICH_LR_PID_OFF, GICH_LR_PID_LEN)
 #define GICH_LR_STATE_MSK BIT32_MASK(GICH_LR_STATE_OFF, GICH_LR_STATE_LEN)
 #define GICH_LR_STATE(LR) (bit32_extract(LR, GICH_LR_STATE_OFF, GICH_LR_STATE_LEN))
 typedef uint32_t gic_lr_t;
 #else
+#define GICH_APR_NUM      (4)
 #define GICH_LR_VID_OFF   (0)
 #define GICH_LR_VID_LEN   (32)
 #define GICH_LR_PID_OFF   (32)
@@ -305,6 +307,7 @@ typedef uint32_t gic_lr_t;
 #define GICH_LR_HW_BIT    (1ULL << 61)
 #define GICH_LR_EOI_BIT   (1ULL << 41)
 #define GICH_NUM_ELRSR    (1)
+#define GICH_MAX_NUM_LRS  (16)
 #define GICH_LR_PRIO_MSK  BIT64_MASK(GICH_LR_PRIO_OFF, GICH_LR_PRIO_LEN)
 #define GICH_LR_PID_MSK   BIT64_MASK(GICH_LR_PID_OFF, GICH_LR_PID_LEN)
 #define GICH_LR_STATE_MSK BIT64_MASK(GICH_LR_STATE_OFF, GICH_LR_STATE_LEN)
@@ -342,13 +345,13 @@ struct gich_hw {
     uint8_t pad0[0x10 - 0x0c];
     uint32_t MISR;
     uint8_t pad1[0x20 - 0x14];
-    uint32_t EISR[GIC_NUM_LIST_REGS / (sizeof(uint32_t) * 8)];
+    uint32_t EISR[GICH_MAX_NUM_LRS / (sizeof(uint32_t) * 8)];
     uint8_t pad2[0x30 - 0x28];
-    uint32_t ELSR[GIC_NUM_LIST_REGS / (sizeof(uint32_t) * 8)];
+    uint32_t ELSR[GICH_MAX_NUM_LRS / (sizeof(uint32_t) * 8)];
     uint8_t pad3[0xf0 - 0x38];
     uint32_t APR;
     uint8_t pad4[0x100 - 0x0f4];
-    uint32_t LR[GIC_NUM_LIST_REGS];
+    uint32_t LR[GICH_MAX_NUM_LRS];
 } __attribute__((__packed__, aligned(0x1000)));
 
 struct gicv_hw {
@@ -389,10 +392,10 @@ struct gicc_state {
     uint32_t priv_IPRIORITYR[GIC_NUM_PRIO_REGS(GIC_CPU_PRIV)];
 
     uint32_t HCR;
-    unsigned long LR[GIC_NUM_LIST_REGS];
+    unsigned long LR[GICH_MAX_NUM_LRS];
 };
 
-extern size_t NUM_LRS;
+extern size_t GIC_NUM_LRS;
 
 void gic_init();
 void gic_cpu_init();
