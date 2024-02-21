@@ -1160,7 +1160,7 @@ static bool vaplic_domain_emul_reserved(uint16_t addr)
  * @return true if conclude without errors.
  * @return false if the access is not aligned.
  */
-static bool vaplic_domain_emul_handler(struct emul_access* acc)
+static bool vaplic_domain_emul_handler(struct vcpu* vcpu, struct emul_access* acc)
 {
     uint16_t emul_addr = 0;
     bool read_only_zero = false;
@@ -1170,7 +1170,7 @@ static bool vaplic_domain_emul_handler(struct emul_access* acc)
         return false;
     }
 
-    emul_addr = (acc->addr - cpu()->vcpu->vm->arch.vaplic.aplic_domain_emul.va_base) & 0x3fff;
+    emul_addr = (acc->addr - vcpu->vm->arch.vaplic.aplic_domain_emul.va_base) & 0x3fff;
 
     if (vaplic_domain_emul_reserved(emul_addr)) {
         read_only_zero = true;
@@ -1229,7 +1229,7 @@ static bool vaplic_domain_emul_handler(struct emul_access* acc)
 
     if (read_only_zero) {
         if (!acc->write) {
-            vcpu_writereg(cpu()->vcpu, acc->reg, 0);
+            vcpu_writereg(vcpu, acc->reg, 0);
         }
     }
     return true;
@@ -1242,7 +1242,7 @@ static bool vaplic_domain_emul_handler(struct emul_access* acc)
  * @return true  if conclude without errors.
  * @return false if the access is not aligned.
  */
-static bool vaplic_idc_emul_handler(struct emul_access* acc)
+static bool vaplic_idc_emul_handler(struct vcpu* vcpu, struct emul_access* acc)
 {
     // only allow aligned word accesses
     if (acc->width != 4 || acc->addr & 0x3) {
@@ -1250,7 +1250,7 @@ static bool vaplic_idc_emul_handler(struct emul_access* acc)
     }
 
     uint32_t addr = acc->addr;
-    idcid_t idc_id = ((acc->addr - cpu()->vcpu->vm->arch.vaplic.aplic_idc_emul.va_base) >> 5) &
+    idcid_t idc_id = ((acc->addr - vcpu->vm->arch.vaplic.aplic_idc_emul.va_base) >> 5) &
         APLIC_MAX_NUM_HARTS_MAKS;
 
     switch (addr & 0x1F) {
@@ -1271,7 +1271,7 @@ static bool vaplic_idc_emul_handler(struct emul_access* acc)
             break;
         default:
             if (!acc->write) {
-                vcpu_writereg(cpu()->vcpu, acc->reg, 0);
+                vcpu_writereg(vcpu, acc->reg, 0);
             }
             break;
     }

@@ -39,7 +39,7 @@ void aborts_data_lower(unsigned long iss, unsigned long far, unsigned long il, u
 
         // TODO: check if the access is aligned. If not, inject an exception in the vm
 
-        if (handler(&emul)) {
+        if (handler(cpu()->vcpu, &emul)) {
             unsigned long pc_step = 2 + (2 * il);
             vcpu_writepc(cpu()->vcpu, vcpu_readpc(cpu()->vcpu) + pc_step);
         } else {
@@ -138,7 +138,7 @@ void sysreg_handler(unsigned long iss, unsigned long far, unsigned long il, unsi
         emul.multi_reg = (ec == ESR_EC_RG_64) ? true : false;
         emul.sign_ext = false;
 
-        if (handler(&emul)) {
+        if (handler(cpu()->vcpu, &emul)) {
             unsigned long pc_step = 2 + (2 * il);
             vcpu_writepc(cpu()->vcpu, vcpu_readpc(cpu()->vcpu) + pc_step);
         } else {
