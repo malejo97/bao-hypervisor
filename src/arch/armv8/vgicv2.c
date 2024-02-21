@@ -185,7 +185,7 @@ void vgic_cpu_init(struct vcpu* vcpu)
         vcpu->arch.vgic_priv.interrupts[i].enabled = true;
     }
 
-    list_init(&vcpu->arch.vgic.spilled);
+    list_init(&vcpu->arch.vgic_priv.spilled);
 
     for (size_t i = 0; i < GICH_MAX_NUM_LRS; i++) {
         vcpu->arch.vgic_priv.gich.lrs[i] = 0;

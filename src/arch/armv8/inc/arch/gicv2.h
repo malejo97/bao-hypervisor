@@ -61,7 +61,6 @@ static inline uint64_t gich_get_elrsr()
 
 static inline uint32_t gich_get_ap1r(size_t index)
 {
-    ASSERT(index == 0);
     return gich->APR;
 }
 
