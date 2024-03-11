@@ -82,6 +82,10 @@ static inline bool range_in_range(unsigned long base1, unsigned long size1, unsi
 #define __DEFINED(VALUE)                ___DEFINED(VALUE true, false)
 #define ___DEFINED(IGNORE, RESULT, ...) (RESULT)
 
+
+#define CONTAINER_OF(STRUCT, FIELD, PTR) \
+    ((STRUCT*)((((uintptr_t)(PTR)) - offsetof(STRUCT, FIELD))))
+
 #endif
 
 #endif /* __UTIL_H__ */
