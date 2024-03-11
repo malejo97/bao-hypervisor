@@ -101,7 +101,7 @@ enum wakeup_reason {
         SMC Trapping
 --------------------------------- */
 
-int32_t psci_smc_handler(uint32_t smc_fid, unsigned long x1, unsigned long x2, unsigned long x3);
+int32_t psci_smc_handler(struct vcpu *vcpu);
 
 int32_t psci_standby();
 int32_t psci_power_down(enum wakeup_reason reason);
