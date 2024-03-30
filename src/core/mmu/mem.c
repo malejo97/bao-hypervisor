@@ -613,14 +613,14 @@ bool mem_map_reclr(struct addr_space* as, vaddr_t va, struct ppages* ppages, siz
         return mem_map(as, va, ppages, num_pages, flags);
     }
 
-    vaddr_t reclrd_va_base = mem_alloc_vpage(&cpu()->as, SEC_HYP_VM, INVALID_VA, reclrd_num);
+    vaddr_t reclrd_va_base = mem_alloc_vpage(&cpu()->as, SEC_HYP_GLOBAL, INVALID_VA, reclrd_num);
     struct ppages reclrd_ppages = mem_alloc_ppages(as->colors, reclrd_num, false);
     mem_map(&cpu()->as, reclrd_va_base, &reclrd_ppages, reclrd_num, PTE_HYP_FLAGS);
 
     /**
      * Map original image onto hypervisor address space.
      */
-    vaddr_t phys_va_base = mem_alloc_vpage(&cpu()->as, SEC_HYP_VM, INVALID_VA, num_pages);
+    vaddr_t phys_va_base = mem_alloc_vpage(&cpu()->as, SEC_HYP_GLOBAL, INVALID_VA, num_pages);
     mem_map(&cpu()->as, phys_va_base, ppages, num_pages, PTE_HYP_FLAGS);
 
     pte_t* pte = NULL;
@@ -913,7 +913,7 @@ void as_init(struct addr_space* as, enum AS_TYPE type, asid_t id, pte_t* root_pt
     if (root_pt == NULL) {
         size_t n = NUM_PAGES(pt_size(&as->pt, 0));
         root_pt = (pte_t*)mem_alloc_page(n,
-            type == AS_HYP || type == AS_HYP_CPY ? SEC_HYP_PRIVATE : SEC_HYP_VM, true);
+            type == AS_HYP || type == AS_HYP_CPY ? SEC_HYP_PRIVATE : SEC_HYP_GLOBAL, true);
         memset((void*)root_pt, 0, n * PAGE_SIZE);
     }
     as->pt.root = root_pt;
