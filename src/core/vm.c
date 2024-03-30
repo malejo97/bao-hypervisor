@@ -48,6 +48,8 @@ void vm_vcpu_init(struct vm* vm, const struct vm_config* config)
     vcpu->phys_id = cpu()->id;
     vcpu->vm = vm;
 
+    vcpu->blocked_count = 0;
+
     vcpu_arch_init(vcpu, vm);
     vcpu_arch_reset(vcpu, config->entry);
 
@@ -348,6 +350,5 @@ __attribute__((weak)) cpumap_t vm_translate_to_vcpu_mask(struct vm* vm, cpumap_t
 
 void vcpu_run(struct vcpu* vcpu)
 {
-    cpu()->vcpu->active = true;
     vcpu_arch_run(vcpu);
 }
