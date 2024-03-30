@@ -172,23 +172,46 @@ static const size_t NUM_EXT = sizeof(ext_table) / sizeof(unsigned long);
 
 enum SBI_MSG_EVENTS { SEND_IPI, HART_START };
 
+union sbi_msg_data {
+    uint64_t raw;
+    struct {
+        uint16_t vm_id;
+    };
+};
+
 void sbi_msg_handler(uint32_t event, uint64_t data);
 CPU_MSG_HANDLER(sbi_msg_handler, SBI_MSG_ID);
 
 void sbi_msg_handler(uint32_t event, uint64_t data)
 {
+    union sbi_msg_data msg_data =  { .raw = data };
+
+    struct vcpu *vcpu = cpu()->vcpu;
+
+    if (msg_data.vm_id != vcpu->vm->id) {
+        vcpu = cpu_get_vcpu_by_vmid(msg_data.vm_id);
+    }
+
+    if (vcpu == NULL) {
+        ERROR("sbi received message for unknown vcpu");
+    }
+
     switch (event) {
         case SEND_IPI:
-            csrs_hvip_set(HIP_VSSIP);
+            if (vcpu == cpu()->vcpu) {
+                csrs_hvip_set(HIP_VSSIP);
+            } else {
+                vcpu->regs.hvip |= HIP_VSSIP;
+            }
             break;
         case HART_START: {
-            spin_lock(&cpu()->vcpu->arch.sbi_ctx.lock);
-            if (cpu()->vcpu->arch.sbi_ctx.state == START_PENDING) {
-                vcpu_arch_reset(cpu()->vcpu, cpu()->vcpu->arch.sbi_ctx.start_addr);
-                vcpu_writereg(cpu()->vcpu, REG_A1, cpu()->vcpu->arch.sbi_ctx.priv);
-                cpu()->vcpu->arch.sbi_ctx.state = STARTED;
+            spin_lock(&vcpu->arch.sbi_ctx.lock);
+            if (vcpu->arch.sbi_ctx.state == START_PENDING) {
+                vcpu_arch_reset(vcpu, vcpu->arch.sbi_ctx.start_addr);
+                vcpu_writereg(vcpu, REG_A1, vcpu->arch.sbi_ctx.priv);
+                vcpu->arch.sbi_ctx.state = STARTED;
             }
-            spin_unlock(&cpu()->vcpu->arch.sbi_ctx.lock);
+            spin_unlock(&vcpu->arch.sbi_ctx.lock);
         } break;
         default:
             WARNING("unknown sbi msg");
@@ -229,9 +252,11 @@ struct sbiret sbi_ipi_handler(unsigned long fid)
     unsigned long hart_mask = vcpu_readreg(cpu()->vcpu, REG_A0);
     unsigned long hart_mask_base = vcpu_readreg(cpu()->vcpu, REG_A1);
 
+    union sbi_msg_data msg_data =  { .vm_id = cpu()->vcpu->vm->id };
     struct cpu_msg msg = {
         .handler = SBI_MSG_ID,
         .event = SEND_IPI,
+        .data = msg_data.raw,
     };
 
     for (size_t i = 0; i < sizeof(hart_mask) * 8; i++) {
@@ -339,10 +364,11 @@ struct sbiret sbi_hsm_start_handler()
 
                 fence_sync_write();
 
+                union sbi_msg_data msg_data =  { .vm_id = cpu()->vcpu->vm->id };
                 struct cpu_msg msg = {
                     .handler = SBI_MSG_ID,
                     .event = HART_START,
-                    .data = 0xdeadbeef,
+                    .data = msg_data.raw,
                 };
                 cpu_send_msg(vcpu->phys_id, &msg);
 
