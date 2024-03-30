@@ -76,7 +76,20 @@
 .macro VM_ENTRY
 
     csrr   t0, sscratch
-    LOAD   x31, CPU_VCPU_OFF(t0)
+    LOAD   x31, CPU_NEXT_VCPU_OFF(t0)
+    beqz   x31, 11f
+    LOAD   x30, CPU_VCPU_OFF(t0)
+    beq    x30, x31, 1f
+    call vcpu_context_switch
+1:
+    li     x29, VCPU_BLOCKED_COUNT
+    add    x29, x29, x31
+    LOAD   x29, (x29)
+    beqz   x29, 2f
+11:
+    call   cpu_arch_park
+    j .
+2:
 
     LOAD   x1, VCPU_REGS_HSTATUS_OFF(x31)
     csrw   CSR_HSTATUS, x1
