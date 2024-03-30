@@ -57,6 +57,9 @@ struct arch_vm_platform {
 };
 
 struct vm_arch {
+
+    unsigned long hgatp;
+
 #if (IRQC == PLIC)
     struct vplic vplic;
 #elif ((IRQC == APLIC) || (IRQC == AIA))
@@ -113,15 +116,16 @@ struct arch_regs {
     unsigned long sstatus;
     unsigned long sepc;
 
-    // unsigned long vsstatus;
-    // unsigned long vsie;
-    // unsigned long vstvec;
-    // unsigned long vsscratch;
-    // unsigned long vsepc;
-    // unsigned long vscause;
-    // unsigned long vstval;
-    // unsigned long vsip;
-    // unsigned long vsatp;
+    unsigned long vsstatus;
+    unsigned long vstvec;
+    unsigned long vsscratch;
+    unsigned long vsepc;
+    unsigned long vscause;
+    unsigned long vstval;
+    unsigned long vsatp;
+    unsigned long hvip;
+    unsigned long hie;
+    uint64_t vstimecmp;
 
 } __attribute__((__packed__, aligned(sizeof(unsigned long))));
 
