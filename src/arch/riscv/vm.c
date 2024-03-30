@@ -53,6 +53,7 @@ void vcpu_arch_reset(struct vcpu* vcpu, vaddr_t entry)
     vcpu->regs.hie  = 0;
     vcpu->regs.vstimecmp = -1;
 
+    vfp_reset(&vcpu->regs.vfp);
 }
 
 unsigned long vcpu_readreg(struct vcpu* vcpu, unsigned long reg)
@@ -108,6 +109,7 @@ void vcpu_restore_state(struct vcpu *vcpu)
     csrs_hvip_write(vcpu->regs.hvip);
     csrs_hgatp_write(vcpu->vm->arch.hgatp);
 
+    vfp_restore_state(&vcpu->regs.vfp);
 }
 
 void vcpu_save_state(struct vcpu* vcpu)
@@ -125,4 +127,6 @@ void vcpu_save_state(struct vcpu* vcpu)
 
     vcpu->regs.hie  = csrs_hie_read();
     vcpu->regs.hvip = csrs_hvip_read();
+
+    vfp_save_state(&vcpu->regs.vfp);
 }

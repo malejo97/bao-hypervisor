@@ -10,6 +10,7 @@
 #include <irqc.h>
 #include <arch/sbi.h>
 #include <arch/interrupts.h>
+#include <arch/vfp.h>
 
 #define REG_RA  (1)
 #define REG_SP  (2)
@@ -126,6 +127,8 @@ struct arch_regs {
     unsigned long hvip;
     unsigned long hie;
     uint64_t vstimecmp;
+
+    struct vfp vfp;
 
 } __attribute__((__packed__, aligned(sizeof(unsigned long))));
 
