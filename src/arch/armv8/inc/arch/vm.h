@@ -10,6 +10,7 @@
 #include <arch/subarch/vm.h>
 #include <arch/vgic.h>
 #include <arch/psci.h>
+#include <vtimer.h>
 #ifdef MEM_PROT_MMU
 #include <arch/smmuv2.h>
 #endif
@@ -46,6 +47,7 @@ struct vcpu_arch {
     unsigned long vmpidr;
     struct vgic_priv vgic_priv;
     struct psci_ctx psci_ctx;
+    struct vtimer vtimer;
 };
 
 struct vcpu* vm_get_vcpu_by_mpidr(struct vm* vm, unsigned long mpidr);

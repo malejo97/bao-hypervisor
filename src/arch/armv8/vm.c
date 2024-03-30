@@ -8,6 +8,7 @@
 #include <fences.h>
 #include <string.h>
 #include <config.h>
+#include <vtimer.h>
 #include <vfp.h>
 
 void vm_arch_init(struct vm* vm, const struct vm_config* config)
@@ -82,6 +83,7 @@ void vcpu_arch_reset(struct vcpu* vcpu, vaddr_t entry)
     vcpu->regs.cptr_el2 = 0;
 
     vfp_reset(&vcpu->regs.vfp);
+    vtimer_reset(vcpu);
 
     /**
      *  TODO: ARMv8-A ARM mentions another implementation optional registers that reset to a known

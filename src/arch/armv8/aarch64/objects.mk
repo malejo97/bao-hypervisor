@@ -6,3 +6,4 @@ cpu-objs-y+=$(ARCH_SUB)/exceptions.o
 cpu-objs-y+=$(ARCH_SUB)/vm.o
 cpu-objs-y+=$(ARCH_SUB)/aborts.o
 cpu-objs-y+=$(ARCH_SUB)/vfp.o
+cpu-objs-y+=$(ARCH_SUB)/vtimer.o
