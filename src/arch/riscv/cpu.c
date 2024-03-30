@@ -34,3 +34,15 @@ void cpu_arch_idle()
                  "j cpu_idle_wakeup\n\r" ::"r"(&cpu()->stack[STACK_SIZE]));
     ERROR("returned from idle wake up");
 }
+
+void cpu_arch_park() {
+
+    // reset stack
+    asm volatile("mv sp, %0\n\r" ::"r"(&cpu()->stack[STACK_SIZE]));
+
+    csrs_sstatus_set(SSTATUS_SIE_BIT);
+
+    while (true) {
+        asm volatile("wfi");
+    }
+}

@@ -36,3 +36,16 @@ void cpu_arch_idle()
 
     ERROR("returned from idle wake up");
 }
+
+void cpu_arch_park() {
+
+    // reset stack
+    asm volatile("mov sp, %0\n\r" ::"r"(&cpu()->stack[STACK_SIZE]));
+
+    // enable interrupts
+    asm volatile("msr   daifclr, 0x3");
+
+    while (true) {
+        asm volatile("wfi");
+    }
+}
