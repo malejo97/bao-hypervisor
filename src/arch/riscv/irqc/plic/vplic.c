@@ -128,9 +128,17 @@ void vplic_update_hart_line(struct vcpu* vcpu, int vcntxt)
     if (pcntxt.hart_id == cpu()->id) {
         int id = vplic_next_pending(vcpu, vcntxt);
         if (id != 0) {
-            csrs_hvip_set(HIP_VSEIP);
+            if (cpu()->vcpu == vcpu) {
+                csrs_hvip_set(HIP_VSEIP);
+            } else {
+                vcpu->regs.hvip |= HIP_VSEIP;
+            }
         } else {
-            csrs_hvip_clear(HIP_VSEIP);
+            if (cpu()->vcpu == vcpu) {
+                csrs_hvip_clear(HIP_VSEIP);
+            } else {
+                vcpu->regs.hvip &= ~HIP_VSEIP;
+            }
         }
     } else {
         struct cpu_msg msg = { VPLIC_IPI_ID, UPDATE_HART_LINE, vcntxt };
