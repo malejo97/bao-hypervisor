@@ -51,7 +51,12 @@ void vcpu_arch_init(struct vcpu* vcpu, struct vm* vm)
 {
     vcpu->regs.vmpidr_el2= vm_cpuid_to_mpidr(vm, vcpu->id);
 
-    vcpu->arch.psci_ctx.state = vcpu->id == 0 ? ON : OFF;
+    if (vcpu->id == 0) {
+        vcpu->arch.psci_ctx.state = ON;
+    } else {
+        vcpu_block(vcpu);
+        vcpu->arch.psci_ctx.state = OFF;
+    }
 
     vcpu_arch_profile_init(vcpu, vm);
 
