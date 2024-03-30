@@ -47,10 +47,11 @@ void vm_vcpu_init(struct vm* vm, const struct vm_config* config)
     vcpu->id = vcpu_id;
     vcpu->phys_id = cpu()->id;
     vcpu->vm = vm;
-    cpu()->vcpu = vcpu;
 
     vcpu_arch_init(vcpu, vm);
     vcpu_arch_reset(vcpu, config->entry);
+
+    cpu_add_vcpu(vcpu);
 }
 
 void vm_map_mem_region(struct vm* vm, struct vm_mem_region* reg)
