@@ -352,3 +352,12 @@ void vcpu_run(struct vcpu* vcpu)
 {
     vcpu_arch_run(vcpu);
 }
+
+void vcpu_context_switch(void)
+{
+    if (cpu()->vcpu != NULL) {
+        vcpu_save_state(cpu()->vcpu);
+    }
+    vcpu_restore_state(cpu()->next_vcpu);
+    cpu()->vcpu = cpu()->next_vcpu;
+}
