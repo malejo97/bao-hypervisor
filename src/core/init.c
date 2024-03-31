@@ -37,6 +37,8 @@ void init(cpuid_t cpu_id, paddr_t load_addr)
 
     vmm_init();
 
+    vcpu_arch_entry();
+
     /* Should never reach here */
     while (1) { }
 }
