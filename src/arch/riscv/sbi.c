@@ -476,8 +476,4 @@ void sbi_init()
             ERROR("sbi does not support ext 0x%x", ext_table[i]);
         }
     }
-
-    if (!interrupts_reserve(TIMR_INT_ID, sbi_timer_irq_handler)) {
-        ERROR("Failed to reserve SBI TIMR_INT_ID interrupt");
-    }
 }

@@ -17,3 +17,4 @@ cpu-objs-y+=iommu.o
 cpu-objs-y+=relocate.o
 cpu-objs-y+=aclint.o
 cpu-objs-y+=vfp.o
+cpu-objs-y+=timer.o

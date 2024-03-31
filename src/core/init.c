@@ -11,6 +11,7 @@
 #include <console.h>
 #include <printk.h>
 #include <platform.h>
+#include <timer.h>
 #include <vmm.h>
 
 void init(cpuid_t cpu_id, paddr_t load_addr)
@@ -31,6 +32,8 @@ void init(cpuid_t cpu_id, paddr_t load_addr)
     }
 
     interrupts_init();
+
+    timer_init();
 
     vmm_init();
 
