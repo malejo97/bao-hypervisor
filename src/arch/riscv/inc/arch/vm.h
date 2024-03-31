@@ -11,6 +11,7 @@
 #include <arch/sbi.h>
 #include <arch/interrupts.h>
 #include <arch/vfp.h>
+#include <timer.h>
 
 #define REG_RA  (1)
 #define REG_SP  (2)
@@ -73,6 +74,7 @@ struct vm_arch {
 struct vcpu_arch {
     vcpuid_t hart_id;
     struct sbi_hsm sbi_ctx;
+    struct timer_event timer_event;
 };
 
 struct arch_regs {

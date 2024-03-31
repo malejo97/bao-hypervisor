@@ -108,6 +108,7 @@ void vcpu_restore_state(struct vcpu *vcpu)
     csrs_hvip_write(vcpu->regs.hvip);
     csrs_hgatp_write(vcpu->vm->arch.hgatp);
 
+    timer_event_add(&vcpu->arch.timer_event);
     vfp_restore_state(&vcpu->regs.vfp);
 }
 
@@ -127,5 +128,6 @@ void vcpu_save_state(struct vcpu* vcpu)
     vcpu->regs.hie  = csrs_hie_read();
     vcpu->regs.hvip = csrs_hvip_read();
 
+    timer_event_remove(&vcpu->arch.timer_event);
     vfp_save_state(&vcpu->regs.vfp);
 }

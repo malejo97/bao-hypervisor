@@ -219,6 +219,11 @@ void sbi_msg_handler(uint32_t event, uint64_t data)
     }
 }
 
+void sbi_timer_irq_handler()
+{
+    csrs_hvip_set(HIP_VSTIP);
+}
+
 struct sbiret sbi_time_handler(unsigned long fid)
 {
     if (fid != SBI_SET_TIMER_FID) {
@@ -227,21 +232,18 @@ struct sbiret sbi_time_handler(unsigned long fid)
 
     uint64_t stime_value = vcpu_readreg(cpu()->vcpu, REG_A0);
     if (CPU_HAS_EXTENSION(CPU_EXT_SSTC)) {
+        cpu()->vcpu->regs.vstimecmp = stime_value;
         csrs_vstimecmp_write(stime_value);
     } else {
-        sbi_set_timer(stime_value); // assumes always success
-        csrs_hvip_clear(HIP_VSTIP);
-        csrs_sie_set(SIE_STIE);
+        struct timer_event *timer_event = &cpu()->vcpu->arch.timer_event;
+        timer_event_remove(timer_event);
+        timer_event_set(timer_event, stime_value, sbi_timer_irq_handler);
+        csrs_hvip_write(HIP_VSTIP);
     }
 
     return (struct sbiret){ SBI_SUCCESS };
 }
 
-void sbi_timer_irq_handler()
-{
-    csrs_hvip_set(HIP_VSTIP);
-    csrs_sie_clear(SIE_STIE);
-}
 
 struct sbiret sbi_ipi_handler(unsigned long fid)
 {
