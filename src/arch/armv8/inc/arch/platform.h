@@ -32,6 +32,7 @@ struct arch_platform {
 
     struct {
         paddr_t base_addr;
+        irqid_t irq;
     } generic_timer;
 
     struct clusters {
