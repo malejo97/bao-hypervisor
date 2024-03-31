@@ -297,6 +297,7 @@ _enter_vas:
     /* Init stack pointer and global pointer */
     /* TODO: what about tp? */
     li      t0, BAO_CPU_BASE
+    csrw    sscratch, t0
     li      sp, CPU_STACK_OFF + CPU_STACK_SIZE
     add     sp, t0, sp
 

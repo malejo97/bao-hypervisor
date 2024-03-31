@@ -32,7 +32,6 @@ void vcpu_arch_reset(struct vcpu* vcpu, vaddr_t entry)
 {
     memset(&vcpu->regs, 0, sizeof(struct arch_regs));
 
-    csrs_sscratch_write((unsigned long)&vcpu->regs);
 
     vcpu->regs.hstatus = HSTATUS_SPV;
     if (RV64) {
