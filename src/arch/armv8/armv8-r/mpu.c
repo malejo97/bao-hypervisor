@@ -7,6 +7,7 @@
 #include <cpu.h>
 #include <arch/sysregs.h>
 #include <arch/fences.h>
+#include <list.h>
 
 static inline const size_t mpu_num_entries()
 {
@@ -26,7 +27,7 @@ static void mpu_entry_get_region(mpid_t mpid, struct mp_region* mpe)
     mpe->as_sec = SEC_UNKNOWN;
 }
 
-static int mpu_node_cmp(node_t* _n1, node_t* _n2)
+static int mpu_node_cmp(void* cookie, node_t* _n1, node_t* _n2)
 {
     struct mpu_node* n1 = (struct mpu_node*)_n1;
     struct mpu_node* n2 = (struct mpu_node*)_n2;
@@ -43,6 +44,8 @@ static int mpu_node_cmp(node_t* _n1, node_t* _n2)
     }
 }
 
+static const struct node_cmp mpu_list_node_cmp = { .cmp = mpu_node_cmp };
+
 static void mpu_entry_set(mpid_t mpid, struct mp_region* mpr)
 {
     unsigned long lim = mpr->base + mpr->size - 1;
@@ -53,7 +56,7 @@ static void mpu_entry_set(mpid_t mpid, struct mp_region* mpr)
     sysreg_prlar_el2_write((lim & PRLAR_LIMIT_MSK) | mpr->mem_flags.prlar);
 
     list_insert_ordered(&cpu()->arch.profile.mpu.order.list,
-        (node_t*)&cpu()->arch.profile.mpu.order.node[mpid], mpu_node_cmp);
+        (node_t*)&cpu()->arch.profile.mpu.order.node[mpid], &mpu_list_node_cmp);
 }
 
 static void mpu_entry_modify(mpid_t mpid, struct mp_region* mpr)
@@ -561,7 +564,7 @@ void mpu_init()
             cpu()->arch.profile.mpu.perms[mpid].el2 = PERM_RWX;
 
             list_insert_ordered(&cpu()->arch.profile.mpu.order.list,
-                (node_t*)&cpu()->arch.profile.mpu.order.node[mpid], mpu_node_cmp);
+                (node_t*)&cpu()->arch.profile.mpu.order.node[mpid], &mpu_list_node_cmp);
         }
     }
 }
