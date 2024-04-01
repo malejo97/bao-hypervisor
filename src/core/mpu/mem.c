@@ -391,6 +391,7 @@ vaddr_t mem_map_cpy(struct addr_space* ass, struct addr_space* asd, vaddr_t vas,
     struct mpe* mpe;
     struct mp_region mpr;
     vaddr_t va_res = INVALID_VA;
+    size_t size = num_pages*PAGE_SIZE;
 
     if ((ass != asd) && (vad == INVALID_VA || vad == vas)) {
         // In mpu-based systems, we can only copy mappings between address spaces, as copying a
@@ -400,14 +401,24 @@ vaddr_t mem_map_cpy(struct addr_space* ass, struct addr_space* asd, vaddr_t vas,
 
         spin_lock(&ass->lock);
         mpid_t reg_num_src = mem_vmpu_get_entry_by_addr(ass, vas);
-        mpe = mem_vmpu_get_entry(ass, reg_num_src);
-        mpr = mpe->region;
+        if (reg_num_src != INVALID_MPID) {
+            mpe = mem_vmpu_get_entry(ass, reg_num_src);
+            mpr = mpe->region;
+        }
         spin_unlock(&ass->lock);
 
-        if (mem_map(asd, &mpr, true)) {
-            va_res = vas;
-        } else {
-            INFO("failed mem map on mem map cpy");
+        // We can only copy the mapping if the full requested region is mapped in the source
+        // address space
+        if ((reg_num_src != INVALID_MPID) && (mpr.size >= size)) {
+            mpr.base = vas;
+            mpr.size = size;
+            // TODO: we should also adapt the permissions no? If we are copying this to the
+            // hypervisor we will most likely want RW, while the guest has RWX.
+            if (mem_map(asd, &mpr, true)) {
+                va_res = vas;
+            } else {
+                INFO("failed mem map on mem map cpy");
+            }
         }
     } else {
         INFO("failed mem map cpy");
