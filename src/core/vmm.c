@@ -204,9 +204,5 @@ void vmm_init()
         struct vm_allocation* vm_alloc = vmm_alloc_install_vm(vm_id, master);
         struct vm_config* vm_config = &config.vmlist[vm_id];
         vm_init(vm_alloc, vm_config, master, vm_id);
-
-        // For now only the last vcpu assigned to this cpu will be scheduled
-        // TODO: implement proper scheduler
-        cpu()->next_vcpu = cpu_get_vcpu_by_vmid(vm_id);
     }
 }
