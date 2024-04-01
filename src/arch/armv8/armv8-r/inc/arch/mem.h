@@ -36,6 +36,10 @@ typedef union {
     };
 } mem_flags_t;
 
+struct addr_space_arch {
+
+};
+
 #define PTE_FLAGS(_prbar, _prlar) \
     ((mem_flags_t){               \
         .prbar = (_prbar),        \
