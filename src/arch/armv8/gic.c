@@ -22,6 +22,9 @@
 volatile struct gicd_hw* gicd;
 spinlock_t gicd_lock;
 
+size_t GIC_NUM_LRS;
+size_t GICH_NUM_APRS;
+
 void gicd_init()
 {
     size_t int_num = gic_num_irqs();
@@ -82,6 +85,7 @@ void gic_init()
         gic_map_mmio();
         gicd_init();
         GIC_NUM_LRS = gich_num_lrs();
+        GICH_NUM_APRS = gic_num_aprs();
     }
 
     cpu_sync_and_clear_msgs(&cpu_glb_sync);
