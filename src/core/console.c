@@ -25,10 +25,13 @@ void console_init()
             WARNING("console base must be page aligned");
         }
 
-        uart = (void*)mem_alloc_map_dev(&cpu()->as, SEC_HYP_GLOBAL, INVALID_VA,
-            platform.console.base, NUM_PAGES(sizeof(*uart)));
-
-        fence_sync_write();
+        if (platform.console.base != 0) {
+            // If no console base address is present on the platform description file, we assume
+            // there are alternatives means of usign the UART instead of MMIO (e.g., call to firmware)
+            uart = (void*)mem_alloc_map_dev(&cpu()->as, SEC_HYP_GLOBAL, INVALID_VA,
+                platform.console.base, NUM_PAGES(sizeof(*uart)));
+            fence_sync_write();
+        }
 
         uart_init(uart);
         uart_enable(uart);
