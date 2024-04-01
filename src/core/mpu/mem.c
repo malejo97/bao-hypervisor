@@ -104,27 +104,6 @@ mpid_t mem_vmpu_get_entry_by_addr(struct addr_space* as, vaddr_t addr)
     return mpid;
 }
 
-static inline priv_t as_priv(struct addr_space* as)
-{
-    priv_t priv;
-
-    switch (as->type) {
-        case AS_HYP:
-        /* fallthrough */
-        case AS_HYP_CPY:
-            priv = PRIV_HYP;
-            break;
-        case AS_VM:
-            priv = PRIV_VM;
-            break;
-        default:
-            priv = PRIV_NONE;
-    }
-
-    return priv;
-}
-
-
 void mem_prot_init()
 {
     mpu_init();
