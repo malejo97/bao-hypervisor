@@ -19,6 +19,8 @@
 #define REGLEN (4)
 #endif
 
+#if defined(MEM_PROT_MMU)
+
 #if (RV64)
 // This layout assumes Sv39 is available as mandated by the RVA23S64 profile
 #define BAO_VAS_BASE (0xffffffc000000000)
@@ -39,6 +41,14 @@
 #define PAGE_SIZE  (0x1000)
 #define STACK_SIZE (PAGE_SIZE)
 #define VM_SHARED_PT_LVL    (0)
+
+#else /* defined(MEM_PROT_MMU) */
+
+#define BAO_VAS_BASE CONFIG_HYP_BASE_ADDR
+#define PAGE_SIZE    (64)
+#define STACK_SIZE   (0x1000)
+
+#endif /* defined(MEM_PROT_MMU) */
 
 #ifndef __ASSEMBLER__
 

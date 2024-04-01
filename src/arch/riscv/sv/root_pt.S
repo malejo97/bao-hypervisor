@@ -17,8 +17,3 @@ root_l1_pt:
 root_l2_pt:
     .skip PAGE_SIZE
 
-.globl root_l1_flat_pt
-.balign PAGE_SIZE, 0
-root_l1_flat_pt:
-    .skip PAGE_SIZE
-

@@ -4,7 +4,6 @@
  */
 
 #include <vm.h>
-#include <page_table.h>
 #include <arch/csrs.h>
 #include <irqc.h>
 #include <arch/instructions.h>
@@ -13,11 +12,7 @@
 
 void vm_arch_init(struct vm* vm, const struct vm_config* config)
 {
-    paddr_t root_pt_pa;
-    mem_translate(&cpu()->as, (vaddr_t)vm->as.pt.root, &root_pt_pa);
-
-    vm->arch.hgatp = (root_pt_pa >> PAGE_SHIFT) | (HGATP_MODE_DFLT) |
-        ((vm->id << HGATP_VMID_OFF) & HGATP_VMID_MSK);
+    vm_arch_mem_prot_init(vm);
 
     virqc_init(vm, &config->platform.arch.irqc);
 }

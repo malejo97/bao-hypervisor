@@ -146,4 +146,6 @@ static inline void vcpu_arch_inject_irq(struct vcpu* vcpu, irqid_t id)
     virqc_inject(vcpu, id);
 }
 
+void vm_arch_mem_prot_init(struct vm* vm);
+
 #endif /* __ARCH_VM_H__ */

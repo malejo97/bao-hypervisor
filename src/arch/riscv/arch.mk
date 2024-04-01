@@ -5,10 +5,12 @@ ARCH_SUB?=riscv64
 
 ifeq ($(ARCH_SUB), riscv64)
 CROSS_COMPILE ?= riscv64-unknown-elf-
-riscv_march:=rv64g
+riscv_march?=rv64g
+riscv_mabi?=ilp64d
 else ifeq ($(ARCH_SUB), riscv32)
 CROSS_COMPILE ?= riscv32-unknown-elf-
-riscv_march:=rv32g
+riscv_march?=rv32gc
+riscv_mabi?=ilp32d
 else
 $(error RISC-V $(ARCH_SUB) not supported!)
 endif
@@ -37,5 +39,14 @@ arch-cflags = -mcmodel=medany -march=$(riscv_march) -mstrict-align
 arch-asflags =
 arch-ldflags = 
 
-arch_mem_prot:=mmu
+arch_mem_prot?=mmu
+
+ifeq ($(arch_mem_prot), mpu)
+riscv_mem_prot:=spmp
+PAGE_SIZE:=64
+else
+riscv_mem_prot:=sv
 PAGE_SIZE:=0x1000
+endif
+
+src_dirs+=$(current_directory)/$(riscv_mem_prot)

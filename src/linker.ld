@@ -17,6 +17,7 @@ SECTIONS
 	_image_start = ABSOLUTE(.);
 
 	.boot : {
+                *(.boot_head)
 		*(.boot)
 	}
 
