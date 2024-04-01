@@ -26,7 +26,7 @@ void interrupts_arch_init()
     }
 
     /* Wait for master hart to finish irqc initialization */
-    cpu_sync_barrier(&cpu_glb_sync);
+    cpu_sync_and_clear_msgs(&cpu_glb_sync);
 
     irqc_cpu_init();
 
