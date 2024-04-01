@@ -17,8 +17,6 @@ static void vm_master_init(struct vm* vm, const struct vm_config* config, vmid_t
     vm->id = vm_id;
 
     cpu_sync_init(&vm->sync, vm->cpu_num);
-
-    vm_mem_prot_init(vm, config);
 }
 
 void vm_cpu_init(struct vm* vm)
@@ -244,10 +242,22 @@ struct vm* vm_init(struct vm_allocation* vm_alloc, const struct vm_config* confi
         vm_master_init(vm, config, vm_id);
     }
 
+    cpu_sync_barrier(&vm->sync);
+
+
     /*
      *  Initialize each core.
      */
     vm_cpu_init(vm);
+
+    cpu_sync_barrier(&vm->sync);
+
+    /*
+     *  Initialize vm memory structures
+     */
+    if (master) {
+        vm_mem_prot_init(vm, config);
+    }
 
     cpu_sync_barrier(&vm->sync);
 

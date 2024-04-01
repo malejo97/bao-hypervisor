@@ -299,6 +299,19 @@ void mem_handle_broadcast_remove(struct addr_space* as, struct mp_region* mpr)
     }
 }
 
+static struct vcpu* mem_get_vcpu_by_asid(asid_t asid)
+{
+    struct vcpu *vcpu = NULL;
+    list_foreach(cpu()->vcpu_list, node_t, node) {
+        struct vcpu* tmp_vcpu = CONTAINER_OF(struct vcpu, cpu_vcpu_list_node, node);
+        if(tmp_vcpu->vm->as.id == asid){
+            vcpu = tmp_vcpu;
+            break;
+        }
+    }
+    return vcpu;
+}
+
 void mem_handle_broadcast_region(uint32_t event, uint64_t data)
 {
     struct shared_region* sh_reg = (struct shared_region*)(uintptr_t)data;
@@ -308,11 +321,11 @@ void mem_handle_broadcast_region(uint32_t event, uint64_t data)
         if (sh_reg->as_type == AS_HYP) {
             as = &cpu()->as;
         } else {
-            struct addr_space* vm_as = &cpu()->vcpu->vm->as;
-            if (vm_as->id != sh_reg->asid) {
+            struct vcpu *vcpu = mem_get_vcpu_by_asid(sh_reg->asid);
+            if (vcpu == NULL) {
                 ERROR("Received shared region for unkown vm address space.");
             }
-            as = vm_as;
+            as = &vcpu->vm->as;
         }
 
         switch (event) {
