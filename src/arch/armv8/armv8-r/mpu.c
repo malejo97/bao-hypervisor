@@ -188,7 +188,20 @@ bool mem_region_get_overlap(struct mp_region* reg1, struct mp_region* reg2,
     return regions_overlap;
 }
 
-bool mpu_map(priv_t priv, struct mp_region* mpr)
+static priv_t mpu_as_priv(struct addr_space *as)
+{
+    priv_t priv;
+
+    if (as->type == AS_VM) {
+        priv = PRIV_VM;
+    } else {
+        priv = PRIV_HYP;
+    }
+
+    return priv;
+}
+
+bool mpu_map(struct addr_space *as, struct mp_region* mpr)
 {
     size_t size_left = mpr->size;
     bool failed = false;
@@ -200,6 +213,7 @@ bool mpu_map(priv_t priv, struct mp_region* mpr)
     mpid_t next = INVALID_MPID;
     mpid_t bottom_mpid = INVALID_MPID;
     mpid_t top_mpid = INVALID_MPID;
+    priv_t priv = mpu_as_priv(as);
 
     while (size_left > 0 && !failed) {
         /**
@@ -467,9 +481,10 @@ bool mpu_map(priv_t priv, struct mp_region* mpr)
     return !failed;
 }
 
-bool mpu_unmap(priv_t priv, struct mp_region* mpr)
+bool mpu_unmap(struct addr_space *as, struct mp_region* mpr)
 {
     size_t size_left = mpr->size;
+    priv_t priv = mpu_as_priv(as);
 
     while (size_left > 0) {
         mpid_t mpid = INVALID_MPID;
