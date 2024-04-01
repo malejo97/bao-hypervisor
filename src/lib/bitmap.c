@@ -30,7 +30,7 @@ size_t bitmap_count_consecutive(bitmap_t* map, size_t size, size_t start, size_t
     size_t pos = start;
     size_t count = 0;
     size_t start_offset = start % BITMAP_GRANULE_LEN;
-    size_t first_word_bits = min(BITMAP_GRANULE_LEN - start_offset, n);
+    size_t first_word_bits = MIN(BITMAP_GRANULE_LEN - start_offset, n);
     bool set = !!bitmap_get(map, start);
     bitmap_granule_t init_mask = BITMAP_GRANULE_MASK(start_offset, first_word_bits);
     bitmap_granule_t mask;
@@ -93,7 +93,7 @@ void bitmap_set_consecutive(bitmap_t* map, size_t start, size_t n)
     size_t pos = start;
     size_t count = n;
     size_t start_offset = start % BITMAP_GRANULE_LEN;
-    size_t first_word_bits = min(BITMAP_GRANULE_LEN - start_offset, count);
+    size_t first_word_bits = MIN(BITMAP_GRANULE_LEN - start_offset, count);
 
     map[pos / BITMAP_GRANULE_LEN] |= BITMAP_GRANULE_MASK(start_offset, first_word_bits);
     pos += first_word_bits;

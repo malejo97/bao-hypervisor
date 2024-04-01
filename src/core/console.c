@@ -64,7 +64,7 @@ __attribute__((format(printf, 1, 2))) void console_printk(const char* fmt, ...)
     spin_lock(&console_lock);
     while (*fmt_it != '\0') {
         chars_writen = vsnprintk(console_bufffer, PRINTF_BUFFER_LEN, &fmt_it, &args);
-        console_write(console_bufffer, min(PRINTF_BUFFER_LEN, chars_writen));
+        console_write(console_bufffer, MIN(PRINTF_BUFFER_LEN, chars_writen));
     }
     spin_unlock(&console_lock);
     va_end(args);
