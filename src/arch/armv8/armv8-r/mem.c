@@ -36,7 +36,7 @@ void as_arch_init(struct addr_space* as)
         .mem_flags = PTE_HYP_FLAGS,
         .as_sec = SEC_HYP_IMAGE,
     };
-    mem_vmpu_set_entry(&cpu()->as, mpid, &mpr);
+    mem_vmpu_set_entry(&cpu()->as, mpid, &mpr, true);
     mpid++;
 
     if (separate_noload_region) {
@@ -46,7 +46,7 @@ void as_arch_init(struct addr_space* as)
             .mem_flags = PTE_HYP_FLAGS,
             .as_sec = SEC_HYP_IMAGE,
         };
-        mem_vmpu_set_entry(&cpu()->as, mpid, &mpr);
+        mem_vmpu_set_entry(&cpu()->as, mpid, &mpr, true);
         mpid++;
     }
 
@@ -56,5 +56,5 @@ void as_arch_init(struct addr_space* as)
         .mem_flags = PTE_HYP_FLAGS,
         .as_sec = SEC_HYP_PRIVATE,
     };
-    mem_vmpu_set_entry(&cpu()->as, mpid, &mpr);
+    mem_vmpu_set_entry(&cpu()->as, mpid, &mpr, true);
 }
