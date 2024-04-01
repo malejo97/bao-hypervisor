@@ -9,6 +9,7 @@
 #include <arch/instructions.h>
 #include <string.h>
 #include <config.h>
+#include <arch/spmp.h>
 
 void vm_arch_init(struct vm* vm, const struct vm_config* config)
 {
@@ -21,6 +22,10 @@ void vcpu_arch_init(struct vcpu* vcpu, struct vm* vm)
 {
     vcpu->arch.sbi_ctx.lock = SPINLOCK_INITVAL;
     vcpu->arch.sbi_ctx.state = vcpu->id == 0 ? STARTED : STOPPED;
+
+#ifdef MEM_PROT_MPU
+    spmp_init(&vcpu->arch.spmp, PRIV_VM);
+#endif
 }
 
 void vcpu_arch_reset(struct vcpu* vcpu, vaddr_t entry)
@@ -105,6 +110,11 @@ void vcpu_restore_state(struct vcpu *vcpu)
 
     timer_event_add(&vcpu->arch.timer_event);
     vfp_restore_state(&vcpu->regs.vfp);
+
+#ifdef MEM_PROT_MPU
+    spmp_set_active(&vcpu->arch.spmp, true);
+    spmp_restore(&vcpu->arch.spmp);
+#endif
 }
 
 void vcpu_save_state(struct vcpu* vcpu)

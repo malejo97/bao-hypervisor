@@ -50,6 +50,8 @@
 
 #endif /* defined(MEM_PROT_MMU) */
 
+#define ARCH_STACK_ALIGN    (1)
+
 #ifndef __ASSEMBLER__
 
 #endif /* !__ASSEMBLER__ */

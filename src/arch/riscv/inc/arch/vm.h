@@ -12,6 +12,7 @@
 #include <arch/interrupts.h>
 #include <arch/vfp.h>
 #include <timer.h>
+#include <arch/spmp.h>
 
 #define REG_RA  (1)
 #define REG_SP  (2)
@@ -75,6 +76,9 @@ struct vcpu_arch {
     vcpuid_t hart_id;
     struct sbi_hsm sbi_ctx;
     struct timer_event timer_event;
+#ifdef MEM_PROT_MPU
+    struct spmp spmp;
+#endif
 };
 
 struct arch_regs {
@@ -131,6 +135,8 @@ struct arch_regs {
     uint64_t vstimecmp;
 
     struct vfp vfp;
+
+    // TODO: missing htimedelta hcounteren, other(?)
 
 } __attribute__((__packed__, aligned(sizeof(unsigned long))));
 

@@ -18,6 +18,8 @@
 #define CSR_VSIP          0x244
 #define CSR_VSATP         0x280
 /* Sstc Extension */
+#define CSR_STIMECMP     0x14D
+#define CSR_STIMECMPH    0x15D
 #define CSR_VSTIMECMP     0x24D
 #define CSR_VSTIMECMPH    0x25D
 
@@ -48,6 +50,7 @@
 #define STVEC_MODE_MSK    BIT_MASK(STVEC_MODE_OFF, STVEC_MODE_LEN)
 #define STVEC_MODE_DIRECT (0)
 #define STVEC_MODE_VECTRD (1)
+
 
 #if (RV64)
 #define SATP_MODE_OFF  (60)
@@ -293,15 +296,10 @@
 #define HSTATUS_VTW                 (1ULL << 21)
 #define HSTATUS_VTSR                (1ULL << 22)
 #define HSTATUS_VSXL_OFF            (32)
-#if RV64
 #define HSTATUS_VSXL_LEN            (2)
 #define HSTATUS_VSXL_MSK            (BIT_MASK(HSTATUS_VSXL_OFF, HSTATUS_VSXL_LEN))
-#define HSTATUS_VSXL_32             (1UL << HSTATUS_VSXL_OFF)
-#define HSTATUS_VSXL_64             (2UL << HSTATUS_VSXL_OFF)
-#else
-#define HSTATUS_VSXL_32             0
-#define HSTATUS_VSXL_64             0
-#endif
+#define HSTATUS_VSXL_32             (1ULL << HSTATUS_VSXL_OFF)
+#define HSTATUS_VSXL_64             (2ULL << HSTATUS_VSXL_OFF)
 
 #define HENVCFG_FIOM                (1ULL << 0)
 #define HENVCFG_CBIE_OFF            (4)
