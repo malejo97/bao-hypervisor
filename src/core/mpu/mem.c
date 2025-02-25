@@ -123,6 +123,7 @@ void as_init(struct addr_space* as, enum AS_TYPE type, asid_t id, cpumap_t cpus,
 {
     as->type = type;
     as->colors = 0;
+    as->lock = SPINLOCK_INITVAL;
     as->id = id;
     as->cpus = cpus;
 
