@@ -500,6 +500,8 @@ void spmp_init(struct spmp* spmp, priv_t priv)
 {
     spmp->alloc_entries = 0;
     spmp->priv = priv;
+    spmp->switchmsk = 0;
+    spmp->locked = 0;
 
     list_init(&spmp->order.list);
 

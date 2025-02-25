@@ -9,7 +9,8 @@
 
 void sched_init()
 {
-
+    cpu()->vcpu = NULL;
+    cpu()->next_vcpu = NULL;
 }
 
 static inline timer_value_t sched_next_event_time(void) 
@@ -49,6 +50,7 @@ void sched_yield()
 }
 
 void sched_start() {
+    sched_init();
     sched_next();
     if (list_size(&cpu()->vcpu_list) > 1) {
         sched_set_next_timer_event();

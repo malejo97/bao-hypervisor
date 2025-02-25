@@ -103,6 +103,7 @@
     j .
 2:
 #ifdef MEM_PROT_MPU
+    csrr   t0, sscratch
     li     x1, VCPU_ARCH_SPMP_SWITCHMSK_OFF
     add    x1, x31, x1
 
