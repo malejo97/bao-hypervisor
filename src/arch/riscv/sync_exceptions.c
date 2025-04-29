@@ -9,6 +9,7 @@
 #include <arch/encoding.h>
 #include <arch/csrs.h>
 #include <arch/instructions.h>
+#include <arch/fences.h>
 
 void internal_exception_handler(unsigned long gprs[])
 {
@@ -30,7 +31,9 @@ static uint32_t read_ins(uintptr_t ins_addr)
     }
 
     if (DEFINED(MEM_PROT_MPU)) {
+        fence_i();
         csrs_spmpswitch_set(cpu()->vcpu->arch.spmp.switchmsk);
+        fence_i();
     }
 
     /**
@@ -42,7 +45,9 @@ static uint32_t read_ins(uintptr_t ins_addr)
         ins |= ((uint32_t)hlvxhu(ins_addr + 2)) << 16;
     }
 
+    
     if (DEFINED(MEM_PROT_MPU)) {
+        fence_i();
         csrs_spmpswitch_clear(cpu()->vcpu->arch.spmp.switchmsk);
     }
 
@@ -146,6 +151,7 @@ void sync_exception_handler()
 {
     size_t pc_step = 0;
     unsigned long _scause = csrs_scause_read();
+    vaddr_t addr = csrs_htval_read() << 2;
 
     if (!(csrs_hstatus_read() & HSTATUS_SPV)) {
         internal_exception_handler(&cpu()->vcpu->regs.x[0]);
@@ -156,7 +162,7 @@ void sync_exception_handler()
     if (_scause < sync_handler_table_size && sync_handler_table[_scause]) {
         pc_step = sync_handler_table[_scause]();
     } else {
-        ERROR("unkown synchronous exception (%d)", _scause);
+        ERROR("unknown synchronous exception (%d) at %x", _scause, addr);
     }
 
     cpu()->vcpu->regs.sepc += pc_step;
