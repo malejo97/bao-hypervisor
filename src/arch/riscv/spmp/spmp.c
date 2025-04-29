@@ -469,18 +469,21 @@ bool mpu_unmap(struct addr_space* as, struct mp_region* mem) {
 
 void mpu_init() {
 
+    for (mpid_t i = 0; i < SPMP_MAX_NUM_ENTRIES; i+= 1) {
+        spmp_set_icfg(i, (spmp_cfg_t){ .a = SPMPCFG_A_OFF });
+    }
+
+    csrs_spmpswitch_write((uint64_t)(-1));
     ssize_t nentries = bit64_ffs(~csrs_spmpswitch_read());
     if (nentries < 0) {
         nentries = 64;
     }
 
+    csrs_spmpswitch_write(0);
+
     // We count one less entry as we reserve the last entry as a "block anything" entry for
     // the hypervisor, so that other entries can be seen as whitelist
     SPMP_NUM_ENTRIES = nentries - 1;
-
-    for (mpid_t i = 0; i < nentries; i+= 1) {
-        spmp_set_icfg(i, (spmp_cfg_t){ .a = SPMPCFG_A_OFF });
-    }
 
     // TODO: check for granularity and expand it to the mapping functions
 }

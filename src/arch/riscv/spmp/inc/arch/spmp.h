@@ -6,6 +6,8 @@
 #include <bitmap.h>
 #include <list.h>
 
+#define SPMP_MAX_NUM_ENTRIES 64
+
 typedef union {
     struct {
         uint8_t r: 1;
