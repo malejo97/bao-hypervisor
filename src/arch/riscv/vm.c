@@ -49,6 +49,10 @@ void vcpu_arch_reset(struct vcpu* vcpu, vaddr_t entry)
     vcpu->regs.vscause = 0;
     vcpu->regs.vstval = 0;
     vcpu->regs.vsatp = 0;
+    #ifdef MEM_PROT_MPU
+    vcpu->regs.vsseccfg = 0;
+    vcpu->regs.vspmpswitch = 0;
+    #endif
     vcpu->regs.hie  = 0;
     vcpu->regs.vstimecmp = -1;
 
@@ -100,6 +104,10 @@ void vcpu_restore_state(struct vcpu *vcpu)
     csrs_vscause_write(vcpu->regs.vscause);
     csrs_vstval_write(vcpu->regs.vstval);
     csrs_vsatp_write(vcpu->regs.vsatp);
+    #ifdef MEM_PROT_MPU
+    csrs_vsseccfg_write(vcpu->regs.vsseccfg);
+    csrs_vspmpswitch_write(vcpu->regs.vspmpswitch);
+    #endif
     if (CPU_HAS_EXTENSION(CPU_EXT_SSTC)) {
         csrs_vstimecmp_write(vcpu->regs.vstimecmp);
     }
@@ -126,6 +134,10 @@ void vcpu_save_state(struct vcpu* vcpu)
     vcpu->regs.vscause = csrs_vscause_read();
     vcpu->regs.vstval = csrs_vstval_read();
     vcpu->regs.vsatp = csrs_vsatp_read();
+    #ifdef MEM_PROT_MPU
+    vcpu->regs.vsseccfg = csrs_vsseccfg_read();
+    vcpu->regs.vspmpswitch = csrs_vspmpswitch_read();
+    #endif
     if (CPU_HAS_EXTENSION(CPU_EXT_SSTC)) {
         vcpu->regs.vstimecmp = csrs_vstimecmp_read();
     }

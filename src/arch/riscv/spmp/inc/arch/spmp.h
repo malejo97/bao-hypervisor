@@ -28,7 +28,6 @@ struct spmp {
 
     // The maximum number of spmp entries is 64, thus 1 bit per entry
     uint64_t alloc_entries;
-    uint64_t switchmsk;
     uint64_t locked;
 
     struct {

@@ -260,9 +260,11 @@ bool spmp_add_region(struct spmp *spmp, struct mp_region* reg)
 
             spmp_set_entry(spmp, mpid, reg);
 
-            spmp->switchmsk |= 1ULL << mpid;
             if (spmp->priv == PRIV_HYP) {
                 csrs_spmpswitch_set(1ULL << mpid);
+            }
+            else if (spmp->priv == PRIV_VM) {
+                csrs_hspmpswitch_set(1ULL << mpid);
             }
 
             struct node_cmp spmp_list_node_cmp = { 
@@ -285,9 +287,11 @@ void spmp_remove_entry(struct spmp *spmp, mpid_t mpid)
         spmp_clear_entry(spmp, mpid);
         spmp_free_entry(spmp, mpid);
 
-        spmp->switchmsk &= ~(1ULL << mpid);
         if (spmp->priv == PRIV_HYP) {
             csrs_spmpswitch_clear(1ULL << mpid);
+        }
+        else if (spmp->priv == PRIV_VM) {
+            csrs_hspmpswitch_clear(1ULL << mpid);
         }
 
         list_rm(&spmp->order.list, (node_t*)&spmp->order.node[mpid]);
@@ -503,7 +507,6 @@ void spmp_init(struct spmp* spmp, priv_t priv)
 {
     spmp->alloc_entries = 0;
     spmp->priv = priv;
-    spmp->switchmsk = 0;
     spmp->locked = 0;
 
     list_init(&spmp->order.list);

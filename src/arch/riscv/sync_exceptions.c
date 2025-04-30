@@ -30,10 +30,6 @@ static uint32_t read_ins(uintptr_t ins_addr)
         ERROR("trying to read guest unaligned instruction");
     }
 
-    if (DEFINED(MEM_PROT_MPU)) {
-        csrs_spmpswitch_set(cpu()->vcpu->arch.spmp.switchmsk);
-    }
-
     /**
      * Read 16 bits at a time to make sure the access is aligned. If the instruction is not
      * compressed, read the following 16-bits.
@@ -42,11 +38,6 @@ static uint32_t read_ins(uintptr_t ins_addr)
     fence_i();
     if ((ins & 0b11) == 3) {
         ins |= ((uint32_t)hlvxhu(ins_addr + 2)) << 16;
-    }
-
-    
-    if (DEFINED(MEM_PROT_MPU)) {
-        csrs_spmpswitch_clear(cpu()->vcpu->arch.spmp.switchmsk);
     }
 
     return ins;
