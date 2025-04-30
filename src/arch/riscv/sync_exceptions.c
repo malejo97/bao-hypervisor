@@ -31,9 +31,7 @@ static uint32_t read_ins(uintptr_t ins_addr)
     }
 
     if (DEFINED(MEM_PROT_MPU)) {
-        fence_i();
         csrs_spmpswitch_set(cpu()->vcpu->arch.spmp.switchmsk);
-        fence_i();
     }
 
     /**
@@ -41,13 +39,13 @@ static uint32_t read_ins(uintptr_t ins_addr)
      * compressed, read the following 16-bits.
      */
     ins = hlvxhu(ins_addr);
+    fence_i();
     if ((ins & 0b11) == 3) {
         ins |= ((uint32_t)hlvxhu(ins_addr + 2)) << 16;
     }
 
     
     if (DEFINED(MEM_PROT_MPU)) {
-        fence_i();
         csrs_spmpswitch_clear(cpu()->vcpu->arch.spmp.switchmsk);
     }
 
