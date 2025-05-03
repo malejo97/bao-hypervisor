@@ -494,12 +494,7 @@ void mpu_init() {
 
 void spmp_enable_hyp_whitelist_mode()
 {
-    // As the spmp does not provide a whitelist mode, we set the last entry to match the whole
-    // address space but with no permissions.
-    mpid_t last_entry = (mpid_t)SPMP_NUM_ENTRIES;
-    spmp_set_addr(last_entry, (paddr_t)-1);
-    spmp_set_icfg(last_entry, (spmp_cfg_t) { .a = SPMPCFG_A_NAPOT });
-    // spmp_lock_entry(last_entry);
+    csrs_sseccfg_write(0x1ULL);
 }
 
 
