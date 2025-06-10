@@ -10,7 +10,9 @@
 #include <arch/csrs.h>
 #include <list.h>
 #include <bitmap.h>
+#ifdef MEM_PROT_MPU
 #include <arch/spmp.h>
+#endif
 
 #define CPU_HAS_EXTENSION(EXT) (DEFINED(EXT))
 

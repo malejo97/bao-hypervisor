@@ -9,7 +9,9 @@
 #include <arch/instructions.h>
 #include <string.h>
 #include <config.h>
+#ifdef MEM_PROT_MPU
 #include <arch/spmp.h>
+#endif
 
 void vm_arch_init(struct vm* vm, const struct vm_config* config)
 {
