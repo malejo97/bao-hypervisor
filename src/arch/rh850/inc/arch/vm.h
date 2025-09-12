@@ -14,14 +14,21 @@
 
 #define MAX_OF_GP_REGS (sizeof(union gp_regs) / sizeof(unsigned long))
 
-struct intc_dscrp {
-    paddr_t intc1_addr;
-    paddr_t intc2_addr;
-};
-
 struct arch_vm_platform {
     /* interrupt controller */
-    struct intc_dscrp vir;
+    struct vintc_dscrp {
+        paddr_t intc1_base;
+        paddr_t intc2_base;
+    } intc;
+    /* I-Bus */
+    struct vibus_dscrp {
+        paddr_t ipir_base;
+        paddr_t barr_base;
+    } ibus;
+    /* BOOTCTRL */
+    struct vbootctrl_dscrp {
+        paddr_t base;
+    } bootctrl;
 };
 
 struct vm_arch {

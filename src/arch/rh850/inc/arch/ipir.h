@@ -3,10 +3,10 @@
  * Copyright (c) Bao Project and Contributors. All rights reserved.
  */
 
-#include <interrupts.h>
-
 #ifndef __ARCH_IPIR_H__
 #define __ARCH_IPIR_H__
+
+#include <interrupts.h>
 
 #define IPIR_CH3_IRQ_ID     (3)
 #define IPIR_NUM_CHANNELS   (4)
@@ -46,6 +46,6 @@ void ipir_send_ipi(cpuid_t cpu_target);
 void ipir_init(void);
 
 bool vipir_emul_handler(struct emul_access* acc);
-void vipir_init(struct vm* vm);
+void vipir_init(struct vm* vm, const struct vibus_dscrp* vibus_dscrp);
 
 #endif /* __ARCH_IPIR_H__ */

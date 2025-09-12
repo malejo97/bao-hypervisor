@@ -11,8 +11,9 @@
 
 struct vcpu;
 struct emul_access;
+struct vintc_dscrp;
 
-void vintc_init(struct vm* vm);
+void vintc_init(struct vm* vm, const struct vintc_dscrp* vintc_dscrp);
 void vintc_inject(struct vcpu* vcpu, irqid_t int_id);
 void vintc_vcpu_reset(struct vcpu* vcpu);
 void vintc_vm_reset(struct vm* vm);

@@ -6,9 +6,11 @@
 #ifndef __ARCH_BARR_H__
 #define __ARCH_BARR_H__
 
-#include <bao.h>
+#include <vm.h>
 
 #define BARR_NUM_CHANNELS   (16)
+
+struct vibus_dscrp;
 
 struct barr_hw {
     struct {
@@ -44,6 +46,6 @@ struct vbarr_ctx {
 };
 
 bool vbarr_emul_handler(struct emul_access* acc);
-void vbarr_init(struct vm* vm);
+void vbarr_init(struct vm* vm, const struct vibus_dscrp* vibus_dscrp);
 
 #endif /* __ARCH_BARR_H__ */

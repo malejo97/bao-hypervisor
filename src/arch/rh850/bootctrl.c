@@ -78,10 +78,10 @@ bool vbootctrl_emul_handler(struct emul_access* acc) {
     return true;
 }
 
-void vbootctrl_init(struct vm* vm) {
+void vbootctrl_init(struct vm* vm, const struct vbootctrl_dscrp* vbootctrl_dscrp) {
     if (cpu()->id == vm->master) {
         vm->arch.bootctrl_emul = (struct emul_mem){
-            .va_base = platform.arch.bootctrl_addr,
+            .va_base = vbootctrl_dscrp->base,
             .size = ALIGN(0x10, PAGE_SIZE),
             .handler = vbootctrl_emul_handler,
         };

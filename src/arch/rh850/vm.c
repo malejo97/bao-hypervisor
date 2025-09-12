@@ -10,6 +10,7 @@
 #include <arch/bootctrl.h>
 #include <arch/ipir.h>
 #include <arch/vintc.h>
+#include <arch/barr.h>
 
 void vm_arch_init(struct vm* vm, const struct vm_config* vm_config)
 {
@@ -18,10 +19,10 @@ void vm_arch_init(struct vm* vm, const struct vm_config* vm_config)
     /* All VMs use MPID1 for memory protection */
     set_mpid1(vm->id);
 
-    vintc_init(vm);
-    vipir_init(vm);
-    vbootctrl_init(vm);
-    vbarr_init(vm);
+    vintc_init(vm, &vm_config->platform.arch.intc);
+    vipir_init(vm, &vm_config->platform.arch.ibus);
+    vbarr_init(vm, &vm_config->platform.arch.ibus);
+    vbootctrl_init(vm, &vm_config->platform.arch.bootctrl);
 }
 
 void vcpu_arch_init(struct vcpu* vcpu, struct vm* vm)

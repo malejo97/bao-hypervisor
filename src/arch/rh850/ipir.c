@@ -251,11 +251,11 @@ bool vipir_emul_handler(struct emul_access* acc)
     return true;
 }
 
-void vipir_init(struct vm* vm)
+void vipir_init(struct vm* vm, const struct vibus_dscrp* vibus_dscrp)
 {
     if (cpu()->id == vm->master) {
         vm->arch.ipir_emul = (struct emul_mem){
-            .va_base = platform.arch.ipir_addr,
+            .va_base = vibus_dscrp->ipir_base,
             .size = ALIGN(sizeof(struct ipir_hw), PAGE_SIZE),
             .handler = vipir_emul_handler,
         };

@@ -3,7 +3,6 @@
  * Copyright (c) Bao Project and Contributors. All rights reserved.
  */
 
-#include <emul.h>
 #include <vm.h>
 #include <arch/barr.h>
 
@@ -238,7 +237,7 @@ bool vbarr_emul_handler(struct emul_access* acc) {
     return true;
 }
 
-void vbarr_init(struct vm* vm) {
+void vbarr_init(struct vm* vm, const struct vibus_dscrp* vibus_dscrp) {
 
     if (cpu()->id == vm->master) {
 
@@ -249,7 +248,7 @@ void vbarr_init(struct vm* vm) {
         }
 
         vm->arch.barr_emul = (struct emul_mem){
-            .va_base = platform.arch.barr_addr,
+            .va_base = vibus_dscrp->barr_base,
             .size = ALIGN(sizeof(struct barr_hw), PAGE_SIZE),
             .handler = vbarr_emul_handler,
         };

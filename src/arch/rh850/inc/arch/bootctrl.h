@@ -11,6 +11,7 @@
 
 struct vm;
 struct emul_access;
+struct vbootctrl_dscrp;
 
 static inline void bootctrl_start_pe(cpuid_t cpuid) {
     volatile unsigned long* bootctrl = (unsigned long*)platform.arch.bootctrl_addr;
@@ -18,7 +19,7 @@ static inline void bootctrl_start_pe(cpuid_t cpuid) {
     (*bootctrl) |= (1UL << cpuid);
 }
 
-void vbootctrl_init(struct vm* vm);
+void vbootctrl_init(struct vm* vm, const struct vbootctrl_dscrp* vbootctrl_dscrp);
 bool vbootctrl_emul_handler(struct emul_access* acc);
 
 #endif /* __ARCH_BOOTCTRL_H__ */
