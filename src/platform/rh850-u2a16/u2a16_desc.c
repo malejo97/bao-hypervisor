@@ -110,6 +110,7 @@ struct platform platform = {
         },
 
         .bootctrl_addr = 0xFFFB2000,
+        .barr_addr = 0xFFFB8000,
         .ipir_addr = 0xFFFB9000
     }
 };

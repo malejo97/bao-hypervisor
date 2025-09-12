@@ -20,8 +20,8 @@ struct arch_platform {
     } intc;
     
     paddr_t bootctrl_addr;
-
     paddr_t ipir_addr;
+    paddr_t barr_addr;
 };
 
 #endif /* __ARCH_PLATFORM_H__ */

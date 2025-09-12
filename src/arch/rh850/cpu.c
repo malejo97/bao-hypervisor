@@ -5,8 +5,8 @@
 
 #include <bao.h>
 #include <cpu.h>
-#include <platform.h>
 #include <arch/srs.h>
+#include <arch/bootctrl.h>
 
 cpuid_t CPU_MASTER __attribute__((section(".data")));
 
@@ -14,7 +14,6 @@ cpuid_t CPU_MASTER __attribute__((section(".data")));
 void cpu_arch_init(cpuid_t cpuid, paddr_t load_addr)
 {
     UNUSED_ARG(load_addr);
-    volatile unsigned long* bootcrl = (unsigned long*)platform.arch.bootctrl_addr;
 
     if (cpuid == CPU_MASTER) {
         for (size_t c = 0; c < platform.cpu_num; c++) {
@@ -22,7 +21,7 @@ void cpu_arch_init(cpuid_t cpuid, paddr_t load_addr)
                 continue;
             }
 
-            (*bootcrl) |= (1UL << c);
+            bootctrl_start_pe(c);
         }
     }
 

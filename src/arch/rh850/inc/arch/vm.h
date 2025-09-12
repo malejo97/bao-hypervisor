@@ -9,6 +9,7 @@
 #include <bao.h>
 #include <interrupts.h>
 #include <emul.h>
+#include <arch/barr.h>
 #include <arch/vintc.h>
 
 #define MAX_OF_GP_REGS (sizeof(union gp_regs) / sizeof(unsigned long))
@@ -34,6 +35,9 @@ struct vm_arch {
     struct emul_mem ipir_emul;
     /* BOOTCTRL */
     struct emul_mem bootctrl_emul;
+    /* BARR */
+    struct vbarr_ctx vbarr[BARR_NUM_CHANNELS];
+    struct emul_mem barr_emul;
 };
 
 struct vcpu_arch {
@@ -96,8 +100,5 @@ static inline void vcpu_arch_inject_irq(struct vcpu* vcpu, irqid_t id)
 {
     vintc_inject(vcpu, id);
 }
-
-void vbootctrl_init(struct vm* vm);
-bool vbootctrl_emul_handler(struct emul_access* acc);
 
 #endif /* __ARCH_VM_H__ */
