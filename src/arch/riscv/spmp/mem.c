@@ -74,5 +74,5 @@ void as_arch_init(struct addr_space* as)
         ERROR("failed mapping cpu");
     }
 
-    spmp_enable_hyp_whitelist_mode();
+    // spmp_disable_sbi_region();
 }

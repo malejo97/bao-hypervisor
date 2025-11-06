@@ -2,6 +2,7 @@
 
 #include <mem.h>
 #include <arch/csrs.h>
+#include <arch/fences.h>
 #include <cpu.h>
 #include <vm.h>
 
@@ -12,103 +13,16 @@ static size_t SPMP_NUM_ENTRIES;
 
 static void spmp_set_icfg(mpid_t i, spmp_cfg_t cfg)
 {
-    size_t cfgi = i / 4;
-    size_t cfgi_off = (i % 4) * 8;
-    if (RV64 && ((cfgi & 1) != 0)) {
-        cfgi -= 1;
-        cfgi_off += 32;
-    }
-    unsigned long mask = SPMPCFG_ICFG_MSK << cfgi_off;
-    unsigned long val = ((unsigned long)cfg.raw )<< cfgi_off;
-
-    switch (cfgi) {
-        case 0: csrs_spmpcfg0_clear(mask); csrs_spmpcfg0_set(val); break;
-        case 1: csrs_spmpcfg1_clear(mask); csrs_spmpcfg1_set(val); break;
-        case 2: csrs_spmpcfg2_clear(mask); csrs_spmpcfg2_set(val); break;
-        case 3: csrs_spmpcfg3_clear(mask); csrs_spmpcfg3_set(val); break;
-        case 4: csrs_spmpcfg4_clear(mask); csrs_spmpcfg4_set(val); break;
-        case 5: csrs_spmpcfg5_clear(mask); csrs_spmpcfg5_set(val); break;
-        case 6: csrs_spmpcfg6_clear(mask); csrs_spmpcfg6_set(val); break;
-        case 7: csrs_spmpcfg7_clear(mask); csrs_spmpcfg7_set(val); break;
-        case 8: csrs_spmpcfg8_clear(mask); csrs_spmpcfg8_set(val); break;
-        case 9: csrs_spmpcfg9_clear(mask); csrs_spmpcfg9_set(val); break;
-        case 10: csrs_spmpcfg10_clear(mask); csrs_spmpcfg10_set(val); break;
-        case 11: csrs_spmpcfg11_clear(mask); csrs_spmpcfg11_set(val); break;
-        case 12: csrs_spmpcfg12_clear(mask); csrs_spmpcfg12_set(val); break;
-        case 13: csrs_spmpcfg13_clear(mask); csrs_spmpcfg13_set(val); break;
-        case 14: csrs_spmpcfg14_clear(mask); csrs_spmpcfg14_set(val); break;
-        case 15: csrs_spmpcfg15_clear(mask); csrs_spmpcfg15_set(val); break;            
-    }
+    csrs_siselect_write(i + CSR_SPMP_SISELECT_BASE);
+    csrs_sireg2_write((unsigned long)cfg.raw);
+    fence_i();
 }
 
 static void spmp_set_addr(mpid_t i, paddr_t addr)
 {
-    switch (i) {
-        case 0:   csrs_spmpaddr0_write(addr); break;
-        case 1:   csrs_spmpaddr1_write(addr); break;
-        case 2:   csrs_spmpaddr2_write(addr); break;
-        case 3:   csrs_spmpaddr3_write(addr); break;
-        case 4:   csrs_spmpaddr4_write(addr); break;
-        case 5:   csrs_spmpaddr5_write(addr); break;
-        case 6:   csrs_spmpaddr6_write(addr); break;
-        case 7:   csrs_spmpaddr7_write(addr); break;
-        case 8:   csrs_spmpaddr8_write(addr); break;
-        case 9:   csrs_spmpaddr9_write(addr); break;
-        case 10: csrs_spmpaddr10_write(addr); break;
-        case 11: csrs_spmpaddr11_write(addr); break;
-        case 12: csrs_spmpaddr12_write(addr); break;
-        case 13: csrs_spmpaddr13_write(addr); break;
-        case 14: csrs_spmpaddr14_write(addr); break;
-        case 15: csrs_spmpaddr15_write(addr); break;
-        case 16: csrs_spmpaddr16_write(addr); break;
-        case 17: csrs_spmpaddr17_write(addr); break;
-        case 18: csrs_spmpaddr18_write(addr); break;
-        case 19: csrs_spmpaddr19_write(addr); break;
-        case 20: csrs_spmpaddr20_write(addr); break;
-        case 21: csrs_spmpaddr21_write(addr); break;
-        case 22: csrs_spmpaddr22_write(addr); break;
-        case 23: csrs_spmpaddr23_write(addr); break;
-        case 24: csrs_spmpaddr24_write(addr); break;
-        case 25: csrs_spmpaddr25_write(addr); break;
-        case 26: csrs_spmpaddr26_write(addr); break;
-        case 27: csrs_spmpaddr27_write(addr); break;
-        case 28: csrs_spmpaddr28_write(addr); break;
-        case 29: csrs_spmpaddr29_write(addr); break;
-        case 30: csrs_spmpaddr30_write(addr); break;
-        case 31: csrs_spmpaddr31_write(addr); break;
-        case 32: csrs_spmpaddr32_write(addr); break;
-        case 33: csrs_spmpaddr33_write(addr); break;
-        case 34: csrs_spmpaddr34_write(addr); break;
-        case 35: csrs_spmpaddr35_write(addr); break;
-        case 36: csrs_spmpaddr36_write(addr); break;
-        case 37: csrs_spmpaddr37_write(addr); break;
-        case 38: csrs_spmpaddr38_write(addr); break;
-        case 39: csrs_spmpaddr39_write(addr); break;
-        case 40: csrs_spmpaddr40_write(addr); break;
-        case 41: csrs_spmpaddr41_write(addr); break;
-        case 42: csrs_spmpaddr42_write(addr); break;
-        case 43: csrs_spmpaddr43_write(addr); break;
-        case 44: csrs_spmpaddr44_write(addr); break;
-        case 45: csrs_spmpaddr45_write(addr); break;
-        case 46: csrs_spmpaddr46_write(addr); break;
-        case 47: csrs_spmpaddr47_write(addr); break;
-        case 48: csrs_spmpaddr48_write(addr); break;
-        case 49: csrs_spmpaddr49_write(addr); break;
-        case 50: csrs_spmpaddr50_write(addr); break;
-        case 51: csrs_spmpaddr51_write(addr); break;
-        case 52: csrs_spmpaddr52_write(addr); break;
-        case 53: csrs_spmpaddr53_write(addr); break;
-        case 54: csrs_spmpaddr54_write(addr); break;
-        case 55: csrs_spmpaddr55_write(addr); break;
-        case 56: csrs_spmpaddr56_write(addr); break;
-        case 57: csrs_spmpaddr57_write(addr); break;
-        case 58: csrs_spmpaddr58_write(addr); break;
-        case 59: csrs_spmpaddr59_write(addr); break;
-        case 60: csrs_spmpaddr60_write(addr); break;
-        case 61: csrs_spmpaddr61_write(addr); break;
-        case 62: csrs_spmpaddr62_write(addr); break;
-        case 63: csrs_spmpaddr63_write(addr); break;
-    }
+    csrs_siselect_write(i + CSR_SPMP_SISELECT_BASE);
+    csrs_sireg_write(addr);
+    fence_i();
 }
 
 static inline bool spmp_reg_is_napot(struct mp_region *mem)
@@ -261,7 +175,7 @@ bool spmp_add_region(struct spmp *spmp, struct mp_region* reg)
             spmp_set_entry(spmp, mpid, reg);
 
             if (spmp->priv == PRIV_HYP) {
-                csrs_spmpswitch_set(1ULL << mpid);
+                csrs_sspmpswitch_set(1ULL << mpid);
             }
             else if (spmp->priv == PRIV_VM) {
                 csrs_hspmpswitch_set(1ULL << mpid);
@@ -288,7 +202,7 @@ void spmp_remove_entry(struct spmp *spmp, mpid_t mpid)
         spmp_free_entry(spmp, mpid);
 
         if (spmp->priv == PRIV_HYP) {
-            csrs_spmpswitch_clear(1ULL << mpid);
+            csrs_sspmpswitch_clear(1ULL << mpid);
         }
         else if (spmp->priv == PRIV_VM) {
             csrs_hspmpswitch_clear(1ULL << mpid);
@@ -299,9 +213,9 @@ void spmp_remove_entry(struct spmp *spmp, mpid_t mpid)
 }
 
 
-static bool spmp_perms_comptible(uint8_t perms1, uint8_t perms2)
+static bool spmp_perms_comptible(uint16_t perms1, uint16_t perms2)
 {
-    uint8_t perms_mask = SPMPCFG_S_BIT | SPMPCFG_R_BIT | SPMPCFG_W_BIT | SPMPCFG_X_BIT;
+    uint16_t perms_mask = SPMPCFG_SHARED_BIT | SPMPCFG_U_BIT | SPMPCFG_R_BIT | SPMPCFG_W_BIT | SPMPCFG_X_BIT;
     return (perms1 & perms_mask) == (perms2 & perms_mask);
 }
 
@@ -360,18 +274,6 @@ static bool spmp_perms_valid(spmp_cfg_t *cfg)
         valid = false;
     }
 
-    if (cfg->s && !cfg->r && !cfg->w  && !cfg->x) {
-        valid = false;
-    }
-
-    // We are forcefully removing X permissions when all permissions are given to the hypervisor
-    // as this permission combination is not possible. Despite the hypervisor not wanting to 
-    // use it, it might come up when it tries to copy mappings from the VM.
-    // TODO: think of a cleaner solution
-    if (cfg->s && cfg->r && cfg->w  && cfg->x) {
-        cfg->x = 0;
-    }
-
     return valid;
 }
 
@@ -384,7 +286,7 @@ bool mpu_map(struct addr_space* as, struct mp_region* mem, bool locked) {
 
     // We need to force the s bit according to the privilege of the spmp instance we are managing
     // However, maybe this should be done a priori.
-    mem->mem_flags.s = !!(spmp->priv == PRIV_HYP);
+    mem->mem_flags.u = !(spmp->priv == PRIV_HYP);
 
     if(spmp_perms_valid(&mem->mem_flags)) {
         mpid_t mpid = spmp_add_region(spmp, mem);
@@ -473,28 +375,33 @@ bool mpu_unmap(struct addr_space* as, struct mp_region* mem) {
 
 void mpu_init() {
 
-    for (mpid_t i = 0; i < SPMP_MAX_NUM_ENTRIES; i+= 1) {
+    /* Get number of entries delegated to HS-mode */
+    SPMP_NUM_ENTRIES = csrs_hspmpdeleg_read();
+
+    // TODO: Check if number of entries is enough?
+
+    /* We asssume that the SBI delegates all PMP resources not used by M-mode to HS-mode.
+        We also assume that the SBI sets the last hSPMP entry for initial operation of the hypervisor*/
+    for (mpid_t i = 0; i < SPMP_NUM_ENTRIES - 1; i+= 1) {
         spmp_set_icfg(i, (spmp_cfg_t){ .a = SPMPCFG_A_OFF });
     }
 
-    csrs_spmpswitch_write((uint64_t)(-1));
-    ssize_t nentries = bit64_ffs(~csrs_spmpswitch_read());
-    if (nentries < 0) {
-        nentries = 64;
-    }
-
-    csrs_spmpswitch_write(0);
-
-    // We count one less entry as we reserve the last entry as a "block anything" entry for
-    // the hypervisor, so that other entries can be seen as whitelist
-    SPMP_NUM_ENTRIES = nentries - 1;
+    csrs_sspmpswitch_write(1ULL << (SPMP_NUM_ENTRIES-1));
 
     // TODO: check for granularity and expand it to the mapping functions
 }
 
-void spmp_enable_hyp_whitelist_mode()
+void spmp_disable_sbi_region()
 {
-    csrs_sseccfg_write(0x1ULL);
+    unsigned long idx = CSR_SPMP_SISELECT_BASE + SPMP_NUM_ENTRIES - 1;
+
+    /* We asssume that the SBI delegates all PMP resources not used by M-mode to HS-mode.
+        We also assume that the SBI sets the last hSPMP entry for initial operation of the hypervisor*/
+    csrs_siselect_write(idx);
+    csrs_sireg_write(0);
+    csrs_sireg2_write(0);
+
+    csrs_sspmpswitch_clear(1ULL << (SPMP_NUM_ENTRIES-1));
 }
 
 
@@ -506,7 +413,7 @@ void spmp_init(struct spmp* spmp, priv_t priv)
 
     list_init(&spmp->order.list);
 
-    for (mpid_t i = 0; i < SPMP_MAX_ENTRIES; i++) {
+    for (mpid_t i = 0; i < SPMP_MAX_NUM_ENTRIES; i++) {
         spmp->order.node[i].mpid = i;
     }
 }

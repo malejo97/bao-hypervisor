@@ -6,19 +6,22 @@
 #include <bitmap.h>
 #include <list.h>
 
-#define SPMP_MAX_NUM_ENTRIES 64
+#define SPMP_MAX_NUM_ENTRIES (64)
 
 typedef union {
     struct {
-        uint8_t r: 1;
-        uint8_t w: 1;
-        uint8_t x: 1;
-        uint8_t a: 2;
-        uint8_t res: 2;
-        uint8_t s: 1;
+        uint16_t r: 1;
+        uint16_t w: 1;
+        uint16_t x: 1;
+        uint16_t a: 2;
+        uint16_t rsv1: 2;
+        uint16_t l: 1;
+        uint16_t u: 1;
+        uint16_t shared: 1;
+        uint16_t rsv2: 6;
     };
 
-    uint8_t raw;
+    uint16_t raw;
 } spmp_cfg_t;
 
 struct spmp {
@@ -33,14 +36,14 @@ struct spmp {
     struct {
         spmp_cfg_t cfg;
         unsigned long addr;
-    } entry[SPMP_MAX_ENTRIES];
+    } entry[SPMP_MAX_NUM_ENTRIES];
 
     struct {
         struct list list;
         struct spmpe_node {
             node_t node;
             mpid_t mpid;
-        } node[SPMP_MAX_ENTRIES];
+        } node[SPMP_MAX_NUM_ENTRIES];
     } order;
 };
 
@@ -51,6 +54,6 @@ static inline void spmp_set_active(struct spmp *spmp, bool active)
 }
 
 void spmp_restore(struct spmp* spmp);
-void spmp_enable_hyp_whitelist_mode();
+void spmp_disable_sbi_region();
 
 #endif /* SPMP_H */

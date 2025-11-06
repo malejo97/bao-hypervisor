@@ -130,7 +130,6 @@ struct arch_regs {
     unsigned long vscause;
     unsigned long vstval;
     unsigned long vsatp;
-    unsigned long vsseccfg;
     unsigned long vspmpswitch;
     unsigned long hvip;
     unsigned long hie;
