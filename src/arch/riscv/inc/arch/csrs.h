@@ -361,17 +361,17 @@ CSRS_GEN_ACCESSORS_NAMED(vstimecmpl, CSR_VSTIMECMP);
 CSRS_GEN_ACCESSORS_NAMED(vstimecmph, CSR_VSTIMECMPH);
 CSRS_GEN_ACCESSORS_MERGED(vstimecmp, vstimecmpl, vstimecmph);
 
-CSRS_GEN_ACCESSORS_NAMED(sspmpswitch, CSR_SSPMPSWITCH);
+CSRS_GEN_ACCESSORS_NAMED(sspmpswitchl, CSR_SSPMPSWITCH);
 CSRS_GEN_ACCESSORS_NAMED(sspmpswitchh, CSR_SSPMPSWITCHH);
-CSRS_GEN_ACCESSORS_MERGED(sspmpswitch, spmpswitch, spmpswitchh);
+CSRS_GEN_ACCESSORS_MERGED(sspmpswitch, sspmpswitchl, sspmpswitchh);
 
-CSRS_GEN_ACCESSORS_NAMED(hspmpswitch, CSR_HSPMPSWITCH);
+CSRS_GEN_ACCESSORS_NAMED(hspmpswitchl, CSR_HSPMPSWITCH);
 CSRS_GEN_ACCESSORS_NAMED(hspmpswitchh, CSR_HSPMPSWITCHH);
-CSRS_GEN_ACCESSORS_MERGED(hspmpswitch, hspmpswitch, hspmpswitchh);
+CSRS_GEN_ACCESSORS_MERGED(hspmpswitch, hspmpswitchl, hspmpswitchh);
 
-CSRS_GEN_ACCESSORS_NAMED(vspmpswitch, CSR_VSPMPSWITCH);
+CSRS_GEN_ACCESSORS_NAMED(vspmpswitchl, CSR_VSPMPSWITCH);
 CSRS_GEN_ACCESSORS_NAMED(vspmpswitchh, CSR_VSPMPSWITCHH);
-CSRS_GEN_ACCESSORS_MERGED(vspmpswitch, vspmpswitch, vspmpswitchh);
+CSRS_GEN_ACCESSORS_MERGED(vspmpswitch, vspmpswitchl, vspmpswitchh);
 #endif
 
 #endif /* __ASSEMBLER__ */

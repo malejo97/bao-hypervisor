@@ -92,9 +92,23 @@ void spmp_set_entry(struct spmp* spmp, mpid_t i, struct mp_region* mem)
 
 void spmp_clear_entry(struct spmp* spmp, mpid_t i)
 {
-    spmp->entry[i].cfg = (spmp_cfg_t) { .a = SPMPCFG_A_OFF };
-    if (spmp->active) {
-        spmp_set_icfg(i, spmp->entry[i].cfg);
+    if (spmp->entry[i].cfg.a == SPMPCFG_A_TOR) {
+        spmp->entry[i].cfg = (spmp_cfg_t) { .a = SPMPCFG_A_OFF };
+        spmp->entry[i].addr = 0;
+        spmp->entry[i-1].addr = 0;
+        if (spmp->active) {
+            spmp_set_icfg(i, spmp->entry[i].cfg);
+            spmp_set_addr(i, spmp->entry[i].addr);
+            spmp_set_addr(i-1, spmp->entry[i-1].addr);
+        }
+    }
+    else {
+        spmp->entry[i].cfg = (spmp_cfg_t) { .a = SPMPCFG_A_OFF };
+        spmp->entry[i].addr = 0;
+        if (spmp->active) {
+            spmp_set_icfg(i, spmp->entry[i].cfg);
+            spmp_set_addr(i, spmp->entry[i].addr);
+        }
     }
 }
 
@@ -246,7 +260,7 @@ void spmp_coalesce_contiguous(struct spmp* spmp) {
             if (contigous && perms_compatible) {
                 cur_mpid = cur->mpid;
                 prev_mpid = prev->mpid;
-                merge = true;
+                // merge = true;
                 break;
             }
         }

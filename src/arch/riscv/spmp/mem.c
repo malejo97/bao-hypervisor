@@ -74,5 +74,5 @@ void as_arch_init(struct addr_space* as)
         ERROR("failed mapping cpu");
     }
 
-    // spmp_disable_sbi_region();
+    spmp_disable_sbi_region();
 }
