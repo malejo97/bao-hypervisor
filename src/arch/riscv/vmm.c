@@ -20,6 +20,8 @@ void vmm_arch_init()
 
     csrs_hideleg_write(HIDELEG_VSSI | HIDELEG_VSTI | HIDELEG_VSEI);
     csrs_hedeleg_write(HEDELEG_ECU | HEDELEG_IPF | HEDELEG_LPF | HEDELEG_SPF);
+    csrs_hcounteren_write(0xFFFFFFFFUL);
+    csrs_hstateen0_set(HSTATEEN0_ENVCFG | HSTATEEN0_C | HSTATEEN0_FCSR);
 
     /**
      * Enable and sanity check presence of Sstc extension if the hypervisor was
@@ -38,6 +40,8 @@ void vmm_arch_init()
     } else {
         csrs_henvcfg_clear(HENVCFG_STCE);
     }
+
+    csrs_henvcfg_set(HENVCFG_CBIE_MSK | HENVCFG_CBCFE | HENVCFG_CBZE);
 
     /**
      * TODO: consider delegating other exceptions e.g. breakpoint or ins misaligned

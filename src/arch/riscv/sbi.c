@@ -12,6 +12,9 @@
 #include <hypercall.h>
 #include <interrupts.h>
 
+#define SBI_LGCY_EXTID_SETTIMER         (0x0)
+#define SBI_LGCY_EXTID_PUTCHAR          (0x1)
+
 #define SBI_EXTID_BASE                  (0x10)
 #define SBI_GET_SBI_SPEC_VERSION_FID    (0)
 #define SBI_GET_SBI_IMPL_ID_FID         (1)
@@ -453,38 +456,64 @@ static struct sbiret sbi_bao_handler(unsigned long fid)
     return ret;
 }
 
+static void sbi_lgcy_putchar_handler(void) 
+{
+    char c = (char)vcpu_readreg(cpu()->vcpu, REG_A0);
+    sbi_console_putchar(c);
+}
+
+static void sbi_lgcy_handler(unsigned long extid)
+{
+    switch (extid) {
+        case SBI_LGCY_EXTID_SETTIMER:
+            (void)sbi_time_handler(SBI_SET_TIMER_FID);
+            break;
+        case SBI_LGCY_EXTID_PUTCHAR:
+            sbi_lgcy_putchar_handler();
+            break;
+        default:
+            WARNING("guest issued unsupported sbi legacy extension call (%d)",
+                    extid);
+    }
+}
+
 size_t sbi_vs_handler()
 {
     unsigned long extid = vcpu_readreg(cpu()->vcpu, REG_A7);
-    unsigned long fid = vcpu_readreg(cpu()->vcpu, REG_A6);
-    struct sbiret ret;
 
-    switch (extid) {
-        case SBI_EXTID_BASE:
-            ret = sbi_base_handler(fid);
-            break;
-        case SBI_EXTID_TIME:
-            ret = sbi_time_handler(fid);
-            break;
-        case SBI_EXTID_IPI:
-            ret = sbi_ipi_handler(fid);
-            break;
-        case SBI_EXTID_RFNC:
-            ret = sbi_rfence_handler(fid);
-            break;
-        case SBI_EXTID_HSM:
-            ret = sbi_hsm_handler(fid);
-            break;
-        case SBI_EXTID_BAO:
-            ret = sbi_bao_handler(fid);
-            break;
-        default:
-            WARNING("guest issued unsupport sbi extension call (%d)", extid);
-            ret.error = SBI_ERR_NOT_SUPPORTED;
+    if (extid < 16) {
+        sbi_lgcy_handler(extid);
+    } else {
+        unsigned long fid = vcpu_readreg(cpu()->vcpu, REG_A6);
+        struct sbiret ret;
+
+        switch (extid) {
+            case SBI_EXTID_BASE:
+                ret = sbi_base_handler(fid);
+                break;
+            case SBI_EXTID_TIME:
+                ret = sbi_time_handler(fid);
+                break;
+            case SBI_EXTID_IPI:
+                ret = sbi_ipi_handler(fid);
+                break;
+            case SBI_EXTID_RFNC:
+                ret = sbi_rfence_handler(fid);
+                break;
+            case SBI_EXTID_HSM:
+                ret = sbi_hsm_handler(fid);
+                break;
+            case SBI_EXTID_BAO:
+                ret = sbi_bao_handler(fid);
+                break;
+            default:
+                WARNING("guest issued unsupport sbi extension call (%d)", extid);
+                ret.error = SBI_ERR_NOT_SUPPORTED;
+        }
+
+        vcpu_writereg(cpu()->vcpu, REG_A0, (unsigned long)ret.error);
+        vcpu_writereg(cpu()->vcpu, REG_A1, (unsigned long)ret.value);
     }
-
-    vcpu_writereg(cpu()->vcpu, REG_A0, (unsigned long)ret.error);
-    vcpu_writereg(cpu()->vcpu, REG_A1, (unsigned long)ret.value);
 
     return 4;
 }

@@ -1,0 +1,1 @@
+boards-objs-y+=nuclei_ux1020_desc.o

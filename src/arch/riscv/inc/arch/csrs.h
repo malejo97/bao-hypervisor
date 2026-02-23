@@ -33,6 +33,8 @@
 #define CSR_HIE           0x604
 #define CSR_HTIMEDELTA    0x605
 #define CSR_HTIMEDELTAH   0x615
+#define CSR_HSTATEEN0     0x60C
+#define CSR_HSTATEEN0H    0x61C
 #define CSR_HCOUNTEREN    0x606
 #define CSR_HGEIE         0x607
 #define CSR_HTVAL         0x643
@@ -219,12 +221,16 @@
 
 #define HENVCFG_FIOM                (1ULL << 0)
 #define HENVCFG_CBIE_OFF            (4)
-#define HSTATUS_CBIE_LEN            (2)
-#define HSTATUS_CBIE_MSK            (BIT_MASK(HSTATUS_CBIE_OFF, HSTATUS_CBIE_LEN))
+#define HENVCFG_CBIE_LEN            (2)
+#define HENVCFG_CBIE_MSK            (BIT_MASK(HENVCFG_CBIE_OFF, HENVCFG_CBIE_LEN))
 #define HENVCFG_CBCFE               (1ULL << 6)
 #define HENVCFG_CBZE                (1ULL << 7)
 #define HENVCFG_PBMTE               (1ULL << 62)
 #define HENVCFG_STCE                (1ULL << 63)
+
+#define HSTATEEN0_C                 (1ULL << 0)
+#define HSTATEEN0_FCSR              (1ULL << 1)
+#define HSTATEEN0_ENVCFG            (1ULL << 62)
 
 #define HCOUNTEREN_CY               (1ULL << 0)
 #define HCOUNTEREN_TM               (1ULL << 1)
@@ -325,6 +331,7 @@ CSRS_GEN_ACCESSORS_NAMED(stimecmp, CSR_STIMECMP)
 CSRS_GEN_ACCESSORS_NAMED(vstimecmp, CSR_VSTIMECMP)
 CSRS_GEN_ACCESSORS_NAMED(henvcfg, CSR_HENVCFG)
 CSRS_GEN_ACCESSORS_NAMED(htimedelta, CSR_HTIMEDELTA)
+CSRS_GEN_ACCESSORS_NAMED(hstateen0, CSR_HSTATEEN0)
 #else
 CSRS_GEN_ACCESSORS_NAMED(henvcfgl, CSR_HENVCFG)
 CSRS_GEN_ACCESSORS_NAMED(henvcfgh, CSR_HENVCFGH)
@@ -333,6 +340,10 @@ CSRS_GEN_ACCESSORS_MERGED(henvcfg, henvcfgl, henvcfgh)
 CSRS_GEN_ACCESSORS_NAMED(htimedeltal, CSR_HTIMEDELTA)
 CSRS_GEN_ACCESSORS_NAMED(htimedeltah, CSR_HTIMEDELTAH)
 CSRS_GEN_ACCESSORS_MERGED(htimedelta, htimedeltal, htimedeltah)
+
+CSRS_GEN_ACCESSORS_NAMED(hstateen0l, CSR_HSTATEEN0)
+CSRS_GEN_ACCESSORS_NAMED(hstateen0h, CSR_HSTATEEN0H)
+CSRS_GEN_ACCESSORS_MERGED(hstateen0, hstateen0l, hstateen0h)
 
 CSRS_GEN_ACCESSORS_NAMED(stimecmpl, CSR_STIMECMP)
 CSRS_GEN_ACCESSORS_NAMED(stimecmph, CSR_STIMECMPH)
